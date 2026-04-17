@@ -48,34 +48,19 @@ def _drive[ReturnT](
             pending_throw = None
 
 
-class OnEffect:
-    """Binds a set of handlers to a generator."""
-
-    def __init__(self, on_effect: HandlerDict):
-        self._on_effect = on_effect
-
-    def run[ReturnT](self, gen: Generator[Any, Any, ReturnT]) -> Generator[Any, Any, ReturnT]:
-        """Run the generator against the given handlers."""
-
-        return _drive(gen, self._on_effect)
-
-    def complete[ReturnT](self, gen: Generator[Any, Any, ReturnT]) -> ReturnT:
-        """Complete the generator by returning the final value."""
-
-        driven = self.run(gen)
-        send_value = None
-
-        while True:
-            try:
-                effect = driven.send(send_value)
-                raise UnhandledEffect(effect)
-            except StopIteration as stop:
-                return stop.value
+def run[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
+    """Run the generator, handling matched effects and bubbling the rest."""
+    return _drive(gen, handlers)
 
 
 def complete[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> ReturnT:
-    return OnEffect(handlers).complete(gen)
+    """Run the generator to completion; raises on any unhandled effect."""
+    driven = run(gen, **handlers)
+    send_value = None
 
-
-def run[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
-    return OnEffect(handlers).run(gen)
+    while True:
+        try:
+            effect = driven.send(send_value)
+            raise UnhandledEffect(effect)
+        except StopIteration as stop:
+            return stop.value
