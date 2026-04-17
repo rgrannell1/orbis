@@ -60,6 +60,8 @@ Why bother?
 
 ## Constructs
 
+Effect systems are composed of effects (requests to do something), and handlers (how they're done).
+
 ### Effects - Communicate & request
 
 Effects are like events that can receive responses from their handler; or alternatively, like function calls that cross the generator's borders. This gives the benefit of being able to show at the type-level you'd logged, fetched a resource, or other actions normally hidden as system internals.
@@ -105,7 +107,9 @@ Events don't receive responses; they're simply modelled as `Effect[None]` and ar
 
 ### Handlers - Listen & react
 
-Handlers are just normal generators; they're registered to listen for an effect, and upon receiving it they return a value, raise an error, or yield their own effects. 
+Handlers are just normal generators; they're registered to listen for an effect, and upon receiving it they return a value, raise an error, or yield their own effects.
+
+## Composition
 
 ## Build
 
