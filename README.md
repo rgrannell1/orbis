@@ -105,7 +105,7 @@ Events don't receive responses; they're simply modelled as `Effect[None]` and ar
 
 ### Handlers - Listen & react
 
-Handlers are just functions; they're registered to listen for an effect, and upon receiving it they return a value or raise an error.
+Handlers are just normal generators; they're registered to listen for an effect, and upon receiving it they return a value, raise an error, or yield their own effects. 
 
 ## Build
 
