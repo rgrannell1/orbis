@@ -51,7 +51,7 @@ This event-like effect pattern allows aspects of a program to be decoupled; we w
 
 Why bother?
 - Type signatures document logging, database calls, and other aspects of a program
-- Non-OOP dependency injection
+- Non-OOP dependency injection; program against interfaces rather than concrete implementations
 - Clean implementation of custom control-flow mechanisms & state-machines
 - No mocks in testing is a benefit
 - Nicer than monads
