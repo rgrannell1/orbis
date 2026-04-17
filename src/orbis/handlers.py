@@ -1,3 +1,5 @@
+"""Handlers are functions that handle effects and events."""
+
 import inspect
 from typing import Any, Generator, Protocol, TypeVar
 
@@ -10,11 +12,7 @@ HandlerReturnT_co = TypeVar("HandlerReturnT_co", covariant=True)
 
 
 class EffectHandler(Protocol[EffectT_contra, HandlerReturnT_co]):
-    """
-    Effect handlers ... handle effects. Given an effect like `FetchURL`, they define some approach
-    to doing that and satisfying the return-type constraint. Effects request _what_ to do; the handlers
-    define how it's done.
-    """
+    """A handler is a function that handles an effect."""
 
     def __call__(self, effect: EffectT_contra) -> HandlerReturnT_co: ...
 
@@ -36,10 +34,13 @@ def _drive(
         if effect.tag in handlers:
             try:
                 result = handlers[effect.tag](effect)
+
+                # handle the handler generator
                 if inspect.isgenerator(result):
                     send_value = yield from _drive(result, handlers)
                 else:
                     send_value = result
+
                 pending_throw = None
             except Exception as err:
                 send_value = None
@@ -50,13 +51,19 @@ def _drive(
 
 
 class OnEffect:
+    """A context manager for handling effects."""
+
     def __init__(self, on_effect: dict[str, EffectHandler[Any, Any]]):
         self._on_effect = on_effect
 
     def run(self, gen: Generator[Any, Any, ReturnT]) -> Generator[Any, Any, ReturnT]:
+        """Run the generator against the given handlers."""
+
         return _drive(gen, self._on_effect)
 
     def complete(self, gen: Generator[Any, Any, ReturnT]) -> ReturnT:
+        """Complete the generator by returning the final value."""
+
         driven = self.run(gen)
         send_value = None
 

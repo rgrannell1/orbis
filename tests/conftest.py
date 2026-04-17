@@ -23,5 +23,6 @@ def pytest_runtest_logreport(report):
     )
     lines = [line.strip() for line in doc.splitlines() if line.strip()]
     print(f"\n  {indicator}  {colour}{lines[0]}{RESET}")
+
     for line in lines[1:]:
         print(f"     {colour}{line}{RESET}")
