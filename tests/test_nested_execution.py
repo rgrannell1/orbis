@@ -4,53 +4,53 @@ from typing import Generator
 from orbis import Effect, OnEffect
 
 
-class Request(Effect[str]):
+class ERequest(Effect[str]):
   tag = "request"
 
 
-class Respond(Effect[None]):
+class ERespond(Effect[None]):
   tag = "respond"
 
   def __init__(self, body: str):
     self.body = body
 
 
-class Log(Effect[None]):
+class ELog(Effect[None]):
   tag = "log"
 
   def __init__(self, message: str):
     self.message = message
 
 
-def fake_server() -> Generator[Request | Respond | Log, object, str]:
+def fake_server() -> Generator[ERequest | ERespond | ELog, object, str]:
   """An effectful program simulating a server."""
 
-  path = yield Request()
+  path = yield ERequest()
 
-  yield Log(f"request: {path}")
-  yield Respond(f"200 OK {path}")
-  yield Log("response sent")
+  yield ELog(f"request: {path}")
+  yield ERespond(f"200 OK {path}")
+  yield ELog("response sent")
 
   return "done"
 
 
-def handle_request(effect: Request) -> str:
+def handle_request(effect: ERequest) -> str:
   return "/hello"
 
 
-def handle_respond(responses: list[str], effect: Respond) -> None:
+def handle_respond(responses: list[str], effect: ERespond) -> None:
   responses.append(effect.body)
 
 
-def handle_log(log_lines: list[str], effect: Log) -> None:
+def handle_log(log_lines: list[str], effect: ELog) -> None:
   log_lines.append(effect.message)
 
 
 def with_server_handlers(
   responses: list[str],
-  gen: Generator[Request | Respond | Log, object, str],
-) -> Generator[Request | Respond | Log, object, str]:
-  """Handles Request and Respond, letting Log bubble."""
+  gen: Generator[ERequest | ERespond | ELog, object, str],
+) -> Generator[ERequest | ERespond | ELog, object, str]:
+  """Handles ERequest and ERespond, letting ELog bubble."""
 
   return OnEffect({"request": handle_request, "respond": partial(handle_respond, responses)}).run(gen)
 

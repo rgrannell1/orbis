@@ -6,14 +6,14 @@ from orbis import Effect, OnEffect
 ReturnT = TypeVar('ReturnT')
 
 
-class Fetch(Effect[str]):
+class EFetch(Effect[str]):
   tag = "fetch"
 
   def __init__(self, url: str):
     self.url = url
 
 
-class Trace(Effect[None]):
+class ETrace(Effect[None]):
   tag = "trace"
 
   def __init__(self, event: str):
@@ -21,20 +21,20 @@ class Trace(Effect[None]):
 
 
 def traced(
-  fn: Callable[..., Generator[Fetch, str, ReturnT]]
-) -> Callable[..., Generator[Fetch | Trace, str, ReturnT]]:
-  """Decorator that emits a Trace effect before each Fetch."""
+  fn: Callable[..., Generator[EFetch, str, ReturnT]]
+) -> Callable[..., Generator[EFetch | ETrace, str, ReturnT]]:
+  """Decorator that emits an ETrace effect before each EFetch."""
 
   @wraps(fn)
-  def wrapper(*args, **kwargs) -> Generator[Fetch | Trace, str, ReturnT]:
+  def wrapper(*args, **kwargs) -> Generator[EFetch | ETrace, str, ReturnT]:
     gen = fn(*args, **kwargs)
     send_value = None
 
     while True:
       try:
         effect = gen.send(cast(str, send_value))
-        if isinstance(effect, Fetch):
-          yield Trace(f"fetch:{effect.url}")
+        if isinstance(effect, EFetch):
+          yield ETrace(f"fetch:{effect.url}")
         send_value = yield effect
       except StopIteration as stop:
         return stop.value
@@ -43,20 +43,20 @@ def traced(
 
 
 @traced
-def fetch_page() -> Generator[Fetch, str, str]:
+def fetch_page() -> Generator[EFetch, str, str]:
   """Fetches two pages and returns their combined length."""
 
-  a = yield Fetch("http://example.com/a")
-  b = yield Fetch("http://example.com/b")
+  a = yield EFetch("http://example.com/a")
+  b = yield EFetch("http://example.com/b")
 
   return f"{a},{b}"
 
 
-def handle_fetch(effect: Fetch) -> str:
+def handle_fetch(effect: EFetch) -> str:
   return f"<{effect.url}>"
 
 
-def handle_trace(traces: list[str], effect: Trace) -> None:
+def handle_trace(traces: list[str], effect: ETrace) -> None:
   traces.append(effect.event)
 
 

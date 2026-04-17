@@ -4,7 +4,7 @@ from typing import Generator
 from orbis import Effect, OnEffect, UnhandledEffect
 
 
-class Fetch(Effect[str]):
+class EFetch(Effect[str]):
   tag = "fetch"
 
   def __init__(self, url: str):
@@ -14,8 +14,8 @@ class Fetch(Effect[str]):
 def test_unhandled_effect_raises():
   """Proves completing mandates all effects are handled."""
 
-  def program() -> Generator[Fetch, str, str]:
-    result = yield Fetch("http://example.com")
+  def program() -> Generator[EFetch, str, str]:
+    result = yield EFetch("http://example.com")
     return result
 
   with pytest.raises(UnhandledEffect) as exc_info:
@@ -27,15 +27,15 @@ def test_unhandled_effect_raises():
 def test_handler_exception_thrown_into_generator():
   """Proves exceptions are thrown back into the generator."""
 
-  def program() -> Generator[Fetch, str, str]:
+  def program() -> Generator[EFetch, str, str]:
     try:
-      result = yield Fetch("http://bad.example.com")
+      result = yield EFetch("http://bad.example.com")
     except ValueError:
       result = "fallback"
 
     return result
 
-  def handle_fetch(effect: Fetch) -> str:
+  def handle_fetch(effect: EFetch) -> str:
     raise ValueError("network error")
 
   result = OnEffect({"fetch": handle_fetch}).complete(program())
@@ -46,11 +46,11 @@ def test_handler_exception_thrown_into_generator():
 def test_handler_exception_propagates_when_uncaught():
   """Proves handler exceptions reach top-level"""
 
-  def program() -> Generator[Fetch, str, str]:
-    result = yield Fetch("http://bad.example.com")
+  def program() -> Generator[EFetch, str, str]:
+    result = yield EFetch("http://bad.example.com")
     return result
 
-  def handle_fetch(effect: Fetch) -> str:
+  def handle_fetch(effect: EFetch) -> str:
     raise ValueError("network error")
 
   with pytest.raises(ValueError, match="network error"):
