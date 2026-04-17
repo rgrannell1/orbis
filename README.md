@@ -2,6 +2,7 @@
 # Orbis
 
 [![CI](https://github.com/rgrannell1/orbis/actions/workflows/ci.yml/badge.svg)](https://github.com/rgrannell1/orbis/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/rgrannell1/orbis/graph/badge.svg?token=BGMRKCfbCR)](https://codecov.io/gh/rgrannell1/orbis)
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
