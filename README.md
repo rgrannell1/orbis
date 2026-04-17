@@ -6,7 +6,7 @@
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
-Or, any method will do as long as it does the thing.  
+Or, any method will do as long as it does the thing.
 
 Orbis decouples what needs to be done from how it's done. It implements a Python-friendly subset of [algebraic effects](https://en.wikipedia.org/wiki/Effect_system), which is powerful enough for my own uses.
 
@@ -58,11 +58,59 @@ Why bother?
 - No mocks in testing is a benefit
 - Nicer than monads
 
+## Constructs
+
+### Effects - Communicate & request
+
+Effects are like events that can receive responses from their handler; or alternatively, like function calls that cross the generator's borders. This gives the benefit of being to show in the type-level you'd logged, fetched a resource, or other actions normally hidden as system internals.
+
+```python
+def get_user() -> Generator[EGetUser, user, None]:
+    user = yield EGetUser(id)
+    return user
+```
+
+It is more powerful than just function-calls-with-extra-steps; since we're using generators we suspend and resume functions and can wire in custom control flow using Effects. For example, you would recursively search across generators and yield an early suspension event on receiving a match. Many control flow operators can be wired in using an effect system, if needed.
+
+```python
+@dataclass
+class EFound(Effect[Never]):
+    tag: ClassVar[str] = "found"
+    value: Any
+
+class Found(Exception):
+    def __init__(self, value):
+        self.value = value
+
+def search(tree) -> Generator[EFound, Never, None]:
+    if isinstance(tree, int) and tree > 100:
+        yield EFound(tree)
+
+    elif isinstance(tree, list):
+        for subtree in tree:
+            yield from search(subtree)
+
+huge_tree = [[1, [2, 150]], [3, [4, [5]]]]
+
+def handle_found(effect: EFound) -> Never:
+    raise Found(effect.value)
+
+try:
+    OnEffect({"found": handle_found}).complete(search(huge_tree))
+except Found as find:
+    result = find.value
+```
+
+Events don't receive responses; they're simply modelled as `Effect[None]` and are used to broadcast information to a handler (that can then multicast, store, print, whatever you chose).
+
+### Handlers - Listen & react
+
+Handlers are just functions; they're registered to listen for an effect, and upon receiving it they return a value or raise an error.
+
 ## Build
 
 ```sh
 rs install   # install dependencies
-rs run       # run the project
 rs test      # run tests
 rs lint      # lint
 rs format    # format
