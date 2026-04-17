@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete
 
 # We'll ping an integer around
 MarcoPaloSend = int
@@ -49,9 +49,7 @@ def test_marco_polo_counting():
     Proves it returns the correct return result.
     """
 
-    result = OnEffect({"marco": handle_marco, "polo": handle_polo}).complete(
-        marco_polo()
-    )
+    result = complete(marco_polo(), marco=handle_marco, polo=handle_polo)
 
     assert result == (3, 3)
 
@@ -72,7 +70,7 @@ def test_void_effect_sends_none_back():
         received.append(sent_back)
         return "done"
 
-    OnEffect({"notify": lambda effect: None}).complete(program())
+    complete(program(), notify=lambda effect: None)
 
     assert received == [None]
 
@@ -84,6 +82,6 @@ def test_pure_program_with_no_effects():
         return 42
         yield  # makes it a generator
 
-    result = OnEffect({}).complete(program())
+    result = complete(program())
 
     assert result == 42

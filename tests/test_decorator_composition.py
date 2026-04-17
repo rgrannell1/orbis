@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import partial, wraps
 from typing import Callable, ClassVar, Generator, TypeVar, cast
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete
 
 ReturnT = TypeVar("ReturnT")
 
@@ -63,12 +63,7 @@ def test_traced_decorator_emits_trace_per_fetch():
 
     traces: list[str] = []
 
-    result = OnEffect(
-        {
-            "fetch": handle_fetch,
-            "trace": partial(handle_trace, traces),
-        }
-    ).complete(fetch_page())
+    result = complete(fetch_page(), fetch=handle_fetch, trace=partial(handle_trace, traces))
 
     assert result == "<http://example.com/a>,<http://example.com/b>"
     assert traces == [

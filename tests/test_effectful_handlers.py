@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete
 
 
 @dataclass
@@ -48,13 +48,7 @@ def test_handler_can_perform_effects():
     logs: list[str] = []
     cache: dict[str, str] = {"http://example.com": "<cached body>"}
 
-    result = OnEffect(
-        {
-            "fetch": handle_fetch,
-            "cache": lambda e: cache.get(e.key),
-            "log": lambda e: logs.append(e.message),
-        }
-    ).complete(program())
+    result = complete(program(), fetch=handle_fetch, cache=lambda effect: cache.get(effect.key), log=lambda effect: logs.append(effect.message))
 
     assert result == "<cached body>"
     assert logs == ["fetching http://example.com", "cache hit: http://example.com"]

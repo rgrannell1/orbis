@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import ClassVar, Generator
-from orbis import Effect, OnEffect
+from orbis import Effect, complete
 
 
 @dataclass
@@ -59,7 +59,7 @@ def handle_fetch(effect: EFetch) -> str:
 def test_yield_from_composes_effectful_subprograms():
     """Proves `yield from` composes sub-programs; a single handler covers all their effects."""
 
-    result = OnEffect({"fetch": handle_fetch}).complete(fetch_profile(1))
+    result = complete(fetch_profile(1), fetch=handle_fetch)
 
     assert result == Profile(
         user=User(id=1, name="alice"),

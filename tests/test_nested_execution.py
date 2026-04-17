@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete, run
 
 
 class ERequest(Effect[str]):
@@ -50,9 +50,7 @@ def with_server_handlers(
 ) -> Generator[ERequest | ERespond | ELog, object, str]:
     """Handles ERequest and ERespond, letting ELog bubble."""
 
-    return OnEffect(
-        {"request": handle_request, "respond": partial(handle_respond, responses)}
-    ).run(gen)
+    return run(gen, request=handle_request, respond=partial(handle_respond, responses))
 
 
 def test_log_handled_by_downstream_handler():
@@ -61,9 +59,7 @@ def test_log_handled_by_downstream_handler():
     log_lines: list[str] = []
     responses: list[str] = []
 
-    result = OnEffect({"log": partial(handle_log, log_lines)}).complete(
-        with_server_handlers(responses, fake_server())
-    )
+    result = complete(with_server_handlers(responses, fake_server()), log=partial(handle_log, log_lines))
 
     assert result == "done"
     assert responses == ["200 OK /hello"]

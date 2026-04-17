@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete
 
 
 # --- Vending Machine Effects ---
@@ -138,15 +138,14 @@ def run(transactions: int, coins: tuple[int, ...], selections: tuple[str | None,
     dispensed: list[str] = []
     change: list[int] = []
 
-    OnEffect(
-        {
-            "display": recording_display([]),
-            "insert_coin": scripted_coins(*coins),
-            "select_item": scripted_selections(*selections),
-            "dispense": recording_dispense(dispensed),
-            "return_change": recording_change(change),
-        }
-    ).complete(vending_machine(PRICES, transactions=transactions))
+    complete(
+        vending_machine(PRICES, transactions=transactions),
+        display=recording_display([]),
+        insert_coin=scripted_coins(*coins),
+        select_item=scripted_selections(*selections),
+        dispense=recording_dispense(dispensed),
+        return_change=recording_change(change),
+    )
 
     return dispensed, change
 
@@ -185,15 +184,14 @@ def test_insufficient_funds_then_cancel():
     dispensed: list[str] = []
     change: list[int] = []
 
-    OnEffect(
-        {
-            "display": recording_display(messages),
-            "insert_coin": scripted_coins(30),
-            "select_item": scripted_selections("crisps", None),
-            "dispense": recording_dispense(dispensed),
-            "return_change": recording_change(change),
-        }
-    ).complete(vending_machine(PRICES, transactions=1))
+    complete(
+        vending_machine(PRICES, transactions=1),
+        display=recording_display(messages),
+        insert_coin=scripted_coins(30),
+        select_item=scripted_selections("crisps", None),
+        dispense=recording_dispense(dispensed),
+        return_change=recording_change(change),
+    )
 
     assert dispensed == []
     assert change == [30]

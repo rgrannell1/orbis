@@ -15,7 +15,7 @@ Some programs emit events (e.g `yield Event`), to signal something to outside ha
 ```python
 from dataclasses import dataclass
 from typing import ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete
 
 
 @dataclass
@@ -43,10 +43,11 @@ def bridge_of_death() -> Generator[EAsk | ESpeak, str, str]:
         return "gorge"
 
 
-result = OnEffect({
-    "ask":   lambda effect: input(f"{effect.question} "),
-    "speak": lambda effect: print(effect.line),
-}).complete(bridge_of_death())
+result = complete(
+    bridge_of_death(),
+    ask=lambda effect: input(f"{effect.question} "),
+    speak=lambda effect: print(effect.line),
+)
 ```
 
 This event-like effect pattern allows aspects of a program to be decoupled; we want to do a thing, but another part of the program may decide how. This is analogous to dependency-injection, higher-order function usage, request-response, or IPC.
@@ -98,7 +99,7 @@ def handle_found(effect: EFound) -> Never:
     raise Found(effect.value)
 
 try:
-    OnEffect({"found": handle_found}).complete(search(huge_tree))
+    complete(search(huge_tree), found=handle_found)
 except Found as find:
     result = find.value
 ```

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, ClassVar, Generator
-from orbis import Effect, Event, OnEffect
+from orbis import Effect, Event, complete, run
 
 
 @dataclass
@@ -22,7 +22,7 @@ def fetch_user(user_id: int) -> Generator[EFetch | ELog, str, dict]:
 
 
 def with_http(gen: Generator[Any, Any, Any]) -> Generator[Any, Any, Any]:
-    return OnEffect({"fetch": lambda effect: "alice"}).run(gen)
+    return run(gen, fetch=lambda effect: "alice")
 
 
 def main() -> Generator[ELog, None, str]:
@@ -37,9 +37,7 @@ def test_logs_propagate_from_inner_workflow():
 
     logs: list[str] = []
 
-    result = OnEffect({"log": lambda effect: logs.append(effect.message)}).complete(
-        main()
-    )
+    result = complete(main(), log=lambda effect: logs.append(effect.message))
 
     assert result == "alice"
     assert logs == ["starting", "fetching /users/1", "got user: alice"]

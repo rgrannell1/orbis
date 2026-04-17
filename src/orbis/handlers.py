@@ -73,3 +73,11 @@ class OnEffect:
                 raise UnhandledEffect(effect)
             except StopIteration as stop:
                 return stop.value
+
+
+def complete(gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> ReturnT:
+    return OnEffect(handlers).complete(gen)
+
+
+def run(gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
+    return OnEffect(handlers).run(gen)

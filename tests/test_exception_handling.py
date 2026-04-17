@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import dataclass
 from typing import ClassVar, Generator
-from orbis import Effect, OnEffect, UnhandledEffect
+from orbis import Effect, UnhandledEffect, complete
 
 
 @dataclass
@@ -22,7 +22,7 @@ def test_unhandled_effect_raises():
         return result
 
     with pytest.raises(UnhandledEffect) as exc_info:
-        OnEffect({}).complete(program())
+        complete(program())
 
     assert exc_info.value.effect.tag == "fetch"
 
@@ -38,7 +38,7 @@ def test_handler_exception_thrown_into_generator():
 
         return result
 
-    result = OnEffect({"fetch": handle_fetch_raising}).complete(program())
+    result = complete(program(), fetch=handle_fetch_raising)
 
     assert result == "fallback"
 
@@ -51,4 +51,4 @@ def test_handler_exception_propagates_when_uncaught():
         return result
 
     with pytest.raises(ValueError, match="network error"):
-        OnEffect({"fetch": handle_fetch_raising}).complete(program())
+        complete(program(), fetch=handle_fetch_raising)
