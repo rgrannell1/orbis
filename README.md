@@ -6,7 +6,7 @@
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
-Orbis decouples what needs to be done from how it's done.
+Orbis decouples what needs to be done from how it's done. It implements a Python-friendly subset of [algebraic effect](https://en.wikipedia.org/wiki/Effect_system), which is powerful enough for my own uses.
 
 ## Build
 
