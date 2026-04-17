@@ -1,6 +1,6 @@
 
 from functools import partial, wraps
-from typing import Callable, Generator, TypeVar
+from typing import Callable, Generator, TypeVar, cast
 from orbis import Effect, OnEffect
 
 ReturnT = TypeVar('ReturnT')
@@ -32,7 +32,7 @@ def traced(
 
     while True:
       try:
-        effect = gen.send(send_value)
+        effect = gen.send(cast(str, send_value))
         if isinstance(effect, Fetch):
           yield Trace(f"fetch:{effect.url}")
         send_value = yield effect
