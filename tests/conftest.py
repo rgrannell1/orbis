@@ -18,7 +18,9 @@ def pytest_runtest_logreport(report):
         return
 
     doc = getattr(report, "_docstring", report.nodeid)
-    indicator, colour = (f"{GREEN}✓{RESET}", GREEN) if report.passed else (f"{RED}✗{RESET}", RED)
+    indicator, colour = (
+        (f"{GREEN}✓{RESET}", GREEN) if report.passed else (f"{RED}✗{RESET}", RED)
+    )
     lines = [line.strip() for line in doc.splitlines() if line.strip()]
     print(f"\n  {indicator}  {colour}{lines[0]}{RESET}")
     for line in lines[1:]:

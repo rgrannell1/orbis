@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import ClassVar, Generator
 from orbis import Effect, Event, OnEffect
@@ -13,77 +12,78 @@ MarcoPaloReturn = tuple[int, int]
 # Two identical effects
 @dataclass
 class EMarco(Effect[int]):
-  tag: ClassVar[str] = "marco"
-  count: int
+    tag: ClassVar[str] = "marco"
+    count: int
 
 
 @dataclass
 class EPolo(Effect[int]):
-  tag: ClassVar[str] = "polo"
-  count: int
+    tag: ClassVar[str] = "polo"
+    count: int
 
 
 def handle_marco(effect: EMarco) -> int:
-  return effect.count + 1
+    return effect.count + 1
 
 
 def handle_polo(effect: EPolo) -> int:
-  return effect.count + 1
+    return effect.count + 1
 
 
 def marco_polo() -> Generator[EMarco | EPolo, MarcoPaloSend, MarcoPaloReturn]:
-  """Out effectful program."""
-  marco, polo = 0, 0
+    """Out effectful program."""
+    marco, polo = 0, 0
 
-  while True:
-    marco = yield EMarco(marco)
-    polo = yield EPolo(polo)
+    while True:
+        marco = yield EMarco(marco)
+        polo = yield EPolo(polo)
 
-    if marco >= 3 and polo >= 3:
-      return (marco, polo)
+        if marco >= 3 and polo >= 3:
+            return (marco, polo)
 
 
 def test_marco_polo_counting():
-  """
-  Proves nested effects can interplay
-  Proves the program runs to completion
-  Proves it returns the correct return result.
-  """
+    """
+    Proves nested effects can interplay
+    Proves the program runs to completion
+    Proves it returns the correct return result.
+    """
 
-  result = OnEffect({"marco": handle_marco, "polo": handle_polo}).complete(marco_polo())
+    result = OnEffect({"marco": handle_marco, "polo": handle_polo}).complete(
+        marco_polo()
+    )
 
-  assert result == (3, 3)
+    assert result == (3, 3)
 
 
 @dataclass
 class ENotify(Event):
-  tag: ClassVar[str] = "notify"
-  message: str
+    tag: ClassVar[str] = "notify"
+    message: str
 
 
 def test_void_effect_sends_none_back():
-  """Proves Effect[None] handlers send None back to the generator"""
+    """Proves Effect[None] handlers send None back to the generator"""
 
-  received: list[object] = []
+    received: list[object] = []
 
-  def program() -> Generator[ENotify, None, str]:
+    def program() -> Generator[ENotify, None, str]:
+        sent_back = yield ENotify("hello")
+        received.append(sent_back)
+        return "done"
 
-    sent_back = yield ENotify("hello")
-    received.append(sent_back)
-    return "done"
+    OnEffect({"notify": lambda effect: None}).complete(program())
 
-  OnEffect({"notify": lambda effect: None}).complete(program())
-
-  assert received == [None]
+    assert received == [None]
 
 
 def test_pure_program_with_no_effects():
-  """Proves a generator that yields no effects runs to completion correctly."""
+    """Proves a generator that yields no effects runs to completion correctly."""
 
-  def program() -> Generator[Effect, None, int]:
-    return 42
-    yield  # makes it a generator
+    def program() -> Generator[Effect, None, int]:
+        return 42
+        yield  # makes it a generator
 
-  result = OnEffect({}).complete(program())
+    result = OnEffect({}).complete(program())
 
-  assert result == 42
+    assert result == 42
