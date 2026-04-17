@@ -67,6 +67,7 @@ def test_void_effect_sends_none_back():
   received: list[object] = []
 
   def program() -> Generator[ENotify, None, str]:
+
     sent_back = yield ENotify("hello")
     received.append(sent_back)
     return "done"
