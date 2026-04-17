@@ -1,7 +1,7 @@
 
 # Orbis
 
-> All men who repeat a line from Shakespeare are William Shakespear
+> All men who repeat a line from Shakespeare are William Shakespeare
 
 ## Build
 
