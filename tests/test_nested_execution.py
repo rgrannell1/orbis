@@ -1,7 +1,7 @@
 
 from functools import partial
 from typing import Generator
-from orbis import Effect, on_effect, complete
+from orbis import Effect, OnEffect
 
 
 class Request(Effect[str]):
@@ -52,7 +52,7 @@ def with_server_handlers(
 ) -> Generator[Request | Respond | Log, object, str]:
   """Handles Request and Respond, letting Log bubble."""
 
-  return on_effect(request=handle_request, respond=partial(handle_respond, responses)).run(gen)
+  return OnEffect({"request": handle_request, "respond": partial(handle_respond, responses)}).run(gen)
 
 
 def test_log_handled_by_downstream_handler():
@@ -61,7 +61,7 @@ def test_log_handled_by_downstream_handler():
   log_lines: list[str] = []
   responses: list[str] = []
 
-  result = complete(on_effect(log=partial(handle_log, log_lines)).run(with_server_handlers(responses, fake_server())))
+  result = OnEffect({"log": partial(handle_log, log_lines)}).complete(with_server_handlers(responses, fake_server()))
 
   assert result == "done"
   assert responses == ["200 OK /hello"]

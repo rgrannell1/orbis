@@ -43,27 +43,22 @@ def _drive(gen: Generator[Any, Any, ReturnT], handlers: dict[str, EffectHandler[
       pending_throw = None
 
 
-class Handler:
-  def __init__(self, handlers: dict[str, EffectHandler[Any, Any]]):
-    self._handlers = handlers
+class OnEffect:
+  def __init__(self, on_effect: dict[str, EffectHandler[Any, Any]]):
+    self._on_effect = on_effect
 
   def run(self, gen: Generator[Any, Any, ReturnT]) -> Generator[Any, Any, ReturnT]:
-    return _drive(gen, self._handlers)
+    return _drive(gen, self._on_effect)
+
+  def complete(self, gen: Generator[Any, Any, ReturnT]) -> ReturnT:
+    driven = self.run(gen)
+    send_value = None
+
+    while True:
+      try:
+        effect = driven.send(send_value)
+        raise UnhandledEffect(effect)
+      except StopIteration as stop:
+        return stop.value
 
 
-def on_effect(**handlers: EffectHandler[Any, Any]) -> Handler:
-  return Handler(handlers)
-
-
-
-def complete(gen: Generator[Any, Any, ReturnT]) -> ReturnT:
-  "Runs the handled generator to completion"
-
-  send_value = None
-
-  while True:
-    try:
-      effect = gen.send(send_value)
-      raise UnhandledEffect(effect)
-    except StopIteration as stop:
-      return stop.value
