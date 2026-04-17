@@ -49,7 +49,7 @@ result = OnEffect({
 }).complete(bridge_of_death())
 ```
 
-This event-like effect pattern allows aspects of a program to be decoupled; we want to do a thing, but another part of the program may decide how. This is analagous to dependency-injection, higher-order function usage, request-response, or IPC.
+This event-like effect pattern allows aspects of a program to be decoupled; we want to do a thing, but another part of the program may decide how. This is analogous to dependency-injection, higher-order function usage, request-response, or IPC.
 
 Why bother?
 - Type signatures document logging, database calls, and other aspects of a program
@@ -62,10 +62,10 @@ Why bother?
 
 ### Effects - Communicate & request
 
-Effects are like events that can receive responses from their handler; or alternatively, like function calls that cross the generator's borders. This gives the benefit of being to show in the type-level you'd logged, fetched a resource, or other actions normally hidden as system internals.
+Effects are like events that can receive responses from their handler; or alternatively, like function calls that cross the generator's borders. This gives the benefit of being able to show at the type-level you'd logged, fetched a resource, or other actions normally hidden as system internals.
 
 ```python
-def get_user() -> Generator[EGetUser, user, None]:
+def get_user(id: int) -> Generator[EGetUser, User, User]:
     user = yield EGetUser(id)
     return user
 ```
