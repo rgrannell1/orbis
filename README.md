@@ -6,6 +6,8 @@
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
+Or, any method will do as long as it does the thing.  
+
 Orbis decouples what needs to be done from how it's done. It implements a Python-friendly subset of [algebraic effects](https://en.wikipedia.org/wiki/Effect_system), which is powerful enough for my own uses.
 
 Some programs emit events (e.g `yield Event`), to signal something to outside handler functions. Orbis allows those handlers to respond back.
