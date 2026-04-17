@@ -1,6 +1,6 @@
 
 from typing import Generator
-from orbis import Effect, OnEffect
+from orbis import Effect, Event, OnEffect
 
 # We'll ping an integer around
 MarcoPaloSend = int
@@ -52,3 +52,37 @@ def test_marco_polo_counting():
   result = OnEffect({"marco": handle_marco, "polo": handle_polo}).complete(marco_polo())
 
   assert result == (3, 3)
+
+
+class ENotify(Event):
+  tag = "notify"
+
+  def __init__(self, message: str):
+    self.message = message
+
+
+def test_void_effect_sends_none_back():
+  """Proves Effect[None] handlers send None back to the generator"""
+
+  received: list[object] = []
+
+  def program() -> Generator[ENotify, None, str]:
+    sent_back = yield ENotify("hello")
+    received.append(sent_back)
+    return "done"
+
+  OnEffect({"notify": lambda effect: None}).complete(program())
+
+  assert received == [None]
+
+
+def test_pure_program_with_no_effects():
+  """Proves a generator that yields no effects runs to completion correctly."""
+
+  def program() -> Generator[Effect, None, int]:
+    return 42
+    yield  # makes it a generator
+
+  result = OnEffect({}).complete(program())
+
+  assert result == 42
