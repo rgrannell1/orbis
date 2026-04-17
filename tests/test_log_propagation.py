@@ -1,20 +1,19 @@
 
-from typing import Any, Generator
+from dataclasses import dataclass
+from typing import Any, ClassVar, Generator
 from orbis import Effect, Event, OnEffect
 
 
+@dataclass
 class EFetch(Effect[str]):
-  tag = "fetch"
-
-  def __init__(self, url: str):
-    self.url = url
+  tag: ClassVar[str] = "fetch"
+  url: str
 
 
+@dataclass
 class ELog(Event):
-  tag = "log"
-
-  def __init__(self, message: str):
-    self.message = message
+  tag: ClassVar[str] = "log"
+  message: str
 
 
 def fetch_user(user_id: int) -> Generator[EFetch | ELog, str, dict]:

@@ -1,14 +1,13 @@
 
 from dataclasses import dataclass
-from typing import Generator
+from typing import ClassVar, Generator
 from orbis import Effect, OnEffect
 
 
+@dataclass
 class EFetch(Effect[str]):
-  tag = "fetch"
-
-  def __init__(self, url: str):
-    self.url = url
+  tag: ClassVar[str] = "fetch"
+  url: str
 
 
 @dataclass

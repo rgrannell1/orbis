@@ -1,5 +1,6 @@
 
-from typing import Generator
+from dataclasses import dataclass
+from typing import ClassVar, Generator
 from orbis import Effect, Event, OnEffect
 
 # We'll ping an integer around
@@ -10,18 +11,16 @@ MarcoPaloReturn = tuple[int, int]
 
 
 # Two identical effects
+@dataclass
 class EMarco(Effect[int]):
-  tag = "marco"
-
-  def __init__(self, count: int):
-    self.count = count
+  tag: ClassVar[str] = "marco"
+  count: int
 
 
+@dataclass
 class EPolo(Effect[int]):
-  tag = "polo"
-
-  def __init__(self, count: int):
-    self.count = count
+  tag: ClassVar[str] = "polo"
+  count: int
 
 
 def marco_polo() -> Generator[EMarco | EPolo, MarcoPaloSend, MarcoPaloReturn]:
@@ -54,11 +53,10 @@ def test_marco_polo_counting():
   assert result == (3, 3)
 
 
+@dataclass
 class ENotify(Event):
-  tag = "notify"
-
-  def __init__(self, message: str):
-    self.message = message
+  tag: ClassVar[str] = "notify"
+  message: str
 
 
 def test_void_effect_sends_none_back():

@@ -1,23 +1,22 @@
 
+from dataclasses import dataclass
 from functools import partial, wraps
-from typing import Callable, Generator, TypeVar, cast
+from typing import Callable, ClassVar, Generator, TypeVar, cast
 from orbis import Effect, OnEffect
 
 ReturnT = TypeVar('ReturnT')
 
 
+@dataclass
 class EFetch(Effect[str]):
-  tag = "fetch"
-
-  def __init__(self, url: str):
-    self.url = url
+  tag: ClassVar[str] = "fetch"
+  url: str
 
 
+@dataclass
 class ETrace(Effect[None]):
-  tag = "trace"
-
-  def __init__(self, event: str):
-    self.event = event
+  tag: ClassVar[str] = "trace"
+  event: str
 
 
 def traced(

@@ -1,6 +1,7 @@
 
+from dataclasses import dataclass
 from functools import partial
-from typing import Generator
+from typing import ClassVar, Generator
 from orbis import Effect, OnEffect
 
 
@@ -8,18 +9,16 @@ class ERequest(Effect[str]):
   tag = "request"
 
 
+@dataclass
 class ERespond(Effect[None]):
-  tag = "respond"
-
-  def __init__(self, body: str):
-    self.body = body
+  tag: ClassVar[str] = "respond"
+  body: str
 
 
+@dataclass
 class ELog(Effect[None]):
-  tag = "log"
-
-  def __init__(self, message: str):
-    self.message = message
+  tag: ClassVar[str] = "log"
+  message: str
 
 
 def fake_server() -> Generator[ERequest | ERespond | ELog, object, str]:

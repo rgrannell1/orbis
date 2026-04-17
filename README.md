@@ -8,6 +8,54 @@
 
 Orbis decouples what needs to be done from how it's done. It implements a Python-friendly subset of [algebraic effect](https://en.wikipedia.org/wiki/Effect_system), which is powerful enough for my own uses.
 
+Some programs emit events (e.g `yield Event`), to signal something to outside handler functions. Orbis allows those handlers to respond back.
+
+```python
+from dataclasses import dataclass
+from typing import ClassVar, Generator
+from orbis import Effect, Event, OnEffect
+
+
+@dataclass
+class EAsk(Effect[str]):
+    tag: ClassVar[str] = "ask"
+    question: str
+
+
+@dataclass
+class ESpeak(Event):
+    tag: ClassVar[str] = "speak"
+    line: str
+
+
+def bridge_of_death() -> Generator[EAsk | ESpeak, str, str]:
+    name   = yield EAsk("What is your name?")
+    _quest = yield EAsk("What is your quest?")
+    colour = yield EAsk("What is your favourite colour?")
+
+    if colour.lower() == "blue":
+        yield ESpeak(f"Right. Off you go, {name}.")
+        return "crossed"
+    else:
+        yield ESpeak("Auuuuuugh!")
+        return "gorge"
+
+
+result = OnEffect({
+    "ask":   lambda effect: input(f"{effect.question} "),
+    "speak": lambda effect: print(effect.line),
+}).complete(bridge_of_death())
+```
+
+This event-like effect pattern allows aspects of a program to be decoupled; we want to do a thing, but another part of the program may decide how. This is analagous to dependency-injection, higher-order function usage, request-response, or IPC.
+
+Why bother?
+- Type signatures document logging, database calls, and other aspects of a program
+- Non-OOP dependency injection
+- Clean implementation of custom control-flow mechanisms & state-machines
+- No mocks in testing is a benefit
+- Nicer than monads
+
 ## Build
 
 ```sh

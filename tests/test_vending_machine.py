@@ -1,40 +1,37 @@
 
-from typing import Any, Generator
+from dataclasses import dataclass
+from typing import Any, ClassVar, Generator
 from orbis import Effect, OnEffect
 
 
 # --- Vending Machine Effects ---
 
+@dataclass
 class EDisplay(Effect[None]):
-  tag = "display"
-
-  def __init__(self, message: str):
-    self.message = message
+  tag: ClassVar[str] = "display"
+  message: str
 
 
 class EInsertCoin(Effect[int]):
   tag = "insert_coin"
 
 
+@dataclass
 class ESelectItem(Effect[str | None]):
-  tag = "select_item"
-
-  def __init__(self, balance: int):
-    self.balance = balance
+  tag: ClassVar[str] = "select_item"
+  balance: int
 
 
+@dataclass
 class EDispense(Effect[None]):
-  tag = "dispense"
-
-  def __init__(self, item_id: str):
-    self.item_id = item_id
+  tag: ClassVar[str] = "dispense"
+  item_id: str
 
 
+@dataclass
 class EReturnChange(Effect[None]):
-  tag = "return_change"
-
-  def __init__(self, amount: int):
-    self.amount = amount
+  tag: ClassVar[str] = "return_change"
+  amount: int
 
 
 # --- State sub-generators ---
