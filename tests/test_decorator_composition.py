@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from functools import partial, wraps
 from typing import Callable, ClassVar, Generator, TypeVar, cast
-from orbis import Effect, OnEffect
+from orbis import Effect, Event, OnEffect
 
 ReturnT = TypeVar('ReturnT')
 
@@ -14,7 +14,7 @@ class EFetch(Effect[str]):
 
 
 @dataclass
-class ETrace(Effect[None]):
+class ETrace(Event):
   tag: ClassVar[str] = "trace"
   event: str
 

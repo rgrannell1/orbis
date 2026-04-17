@@ -11,6 +11,10 @@ class EFetch(Effect[str]):
   url: str
 
 
+def handle_fetch_raising(effect: EFetch) -> str:
+  raise ValueError("network error")
+
+
 def test_unhandled_effect_raises():
   """Proves completing mandates all effects are handled."""
 
@@ -35,10 +39,7 @@ def test_handler_exception_thrown_into_generator():
 
     return result
 
-  def handle_fetch(effect: EFetch) -> str:
-    raise ValueError("network error")
-
-  result = OnEffect({"fetch": handle_fetch}).complete(program())
+  result = OnEffect({"fetch": handle_fetch_raising}).complete(program())
 
   assert result == "fallback"
 
@@ -50,8 +51,5 @@ def test_handler_exception_propagates_when_uncaught():
     result = yield EFetch("http://bad.example.com")
     return result
 
-  def handle_fetch(effect: EFetch) -> str:
-    raise ValueError("network error")
-
   with pytest.raises(ValueError, match="network error"):
-    OnEffect({"fetch": handle_fetch}).complete(program())
+    OnEffect({"fetch": handle_fetch_raising}).complete(program())

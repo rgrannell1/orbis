@@ -1,13 +1,13 @@
 
 from dataclasses import dataclass
 from typing import Any, ClassVar, Generator
-from orbis import Effect, OnEffect
+from orbis import Effect, Event, OnEffect
 
 
 # --- Vending Machine Effects ---
 
 @dataclass
-class EDisplay(Effect[None]):
+class EDisplay(Event):
   tag: ClassVar[str] = "display"
   message: str
 
@@ -23,13 +23,13 @@ class ESelectItem(Effect[str | None]):
 
 
 @dataclass
-class EDispense(Effect[None]):
+class EDispense(Event):
   tag: ClassVar[str] = "dispense"
   item_id: str
 
 
 @dataclass
-class EReturnChange(Effect[None]):
+class EReturnChange(Event):
   tag: ClassVar[str] = "return_change"
   amount: int
 

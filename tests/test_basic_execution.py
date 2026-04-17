@@ -23,6 +23,14 @@ class EPolo(Effect[int]):
   count: int
 
 
+def handle_marco(effect: EMarco) -> int:
+  return effect.count + 1
+
+
+def handle_polo(effect: EPolo) -> int:
+  return effect.count + 1
+
+
 def marco_polo() -> Generator[EMarco | EPolo, MarcoPaloSend, MarcoPaloReturn]:
   """Out effectful program."""
   marco, polo = 0, 0
@@ -41,12 +49,6 @@ def test_marco_polo_counting():
   Proves the program runs to completion
   Proves it returns the correct return result.
   """
-
-  def handle_marco(effect: EMarco) -> int:
-    return effect.count + 1
-
-  def handle_polo(effect: EPolo) -> int:
-    return effect.count + 1
 
   result = OnEffect({"marco": handle_marco, "polo": handle_polo}).complete(marco_polo())
 

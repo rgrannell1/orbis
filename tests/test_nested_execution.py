@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from functools import partial
 from typing import ClassVar, Generator
-from orbis import Effect, OnEffect
+from orbis import Effect, Event, OnEffect
 
 
 class ERequest(Effect[str]):
@@ -10,13 +10,13 @@ class ERequest(Effect[str]):
 
 
 @dataclass
-class ERespond(Effect[None]):
+class ERespond(Event):
   tag: ClassVar[str] = "respond"
   body: str
 
 
 @dataclass
-class ELog(Effect[None]):
+class ELog(Event):
   tag: ClassVar[str] = "log"
   message: str
 
