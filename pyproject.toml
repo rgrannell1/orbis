@@ -10,6 +10,7 @@ dependencies = []
 dev = [
     "pyright>=1.1.408",
     "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.pytest.ini_options]
