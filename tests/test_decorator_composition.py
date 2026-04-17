@@ -1,9 +1,8 @@
 from dataclasses import dataclass
+from collections.abc import Callable, Generator
 from functools import partial, wraps
-from typing import Callable, ClassVar, Generator, TypeVar, cast
+from typing import ClassVar, cast
 from orbis import Effect, Event, complete
-
-ReturnT = TypeVar("ReturnT")
 
 
 @dataclass
@@ -18,7 +17,7 @@ class ETrace(Event):
     event: str
 
 
-def traced(
+def traced[ReturnT](
     fn: Callable[..., Generator[EFetch, str, ReturnT]],
 ) -> Callable[..., Generator[EFetch | ETrace, str, ReturnT]]:
     """Decorator that emits an ETrace effect before each EFetch."""

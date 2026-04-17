@@ -1,24 +1,23 @@
 """Handlers are functions that handle effects and events."""
 
 import inspect
-from typing import Any, Generator, Protocol, TypeVar
+from collections.abc import Generator
+from typing import Any, Protocol
 
 from orbis.exceptions import UnhandledEffect
 from orbis.effects import Effect
 
-ReturnT = TypeVar("ReturnT")
-EffectT_contra = TypeVar("EffectT_contra", contravariant=True, bound="Effect[Any]")
-HandlerReturnT_co = TypeVar("HandlerReturnT_co", covariant=True)
+type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
 
 
-class EffectHandler(Protocol[EffectT_contra, HandlerReturnT_co]):
+class EffectHandler[EffectT, HandlerReturnT](Protocol):
     """A handler is a function that handles an effect."""
 
-    def __call__(self, effect: EffectT_contra) -> HandlerReturnT_co: ...
+    def __call__(self, effect: EffectT) -> HandlerReturnT: ...
 
 
-def _drive(
-    gen: Generator[Any, Any, ReturnT], handlers: dict[str, EffectHandler[Any, Any]]
+def _drive[ReturnT](
+    gen: Generator[Any, Any, ReturnT], handlers: HandlerDict
 ) -> Generator[Any, Any, ReturnT]:
     """Run the generator against the given handlers."""
 
@@ -35,7 +34,6 @@ def _drive(
             try:
                 result = handlers[effect.tag](effect)
 
-                # handle the handler generator
                 if inspect.isgenerator(result):
                     send_value = yield from _drive(result, handlers)
                 else:
@@ -51,17 +49,17 @@ def _drive(
 
 
 class OnEffect:
-    """A context manager for handling effects."""
+    """Binds a set of handlers to a generator."""
 
-    def __init__(self, on_effect: dict[str, EffectHandler[Any, Any]]):
+    def __init__(self, on_effect: HandlerDict):
         self._on_effect = on_effect
 
-    def run(self, gen: Generator[Any, Any, ReturnT]) -> Generator[Any, Any, ReturnT]:
+    def run[ReturnT](self, gen: Generator[Any, Any, ReturnT]) -> Generator[Any, Any, ReturnT]:
         """Run the generator against the given handlers."""
 
         return _drive(gen, self._on_effect)
 
-    def complete(self, gen: Generator[Any, Any, ReturnT]) -> ReturnT:
+    def complete[ReturnT](self, gen: Generator[Any, Any, ReturnT]) -> ReturnT:
         """Complete the generator by returning the final value."""
 
         driven = self.run(gen)
@@ -75,9 +73,9 @@ class OnEffect:
                 return stop.value
 
 
-def complete(gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> ReturnT:
+def complete[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> ReturnT:
     return OnEffect(handlers).complete(gen)
 
 
-def run(gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
+def run[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
     return OnEffect(handlers).run(gen)

@@ -1,12 +1,10 @@
 """The core data-types of Orbis. Effects and Events are emitted
 and handled."""
 
-from typing import ClassVar, Generic, TypeVar
-
-ReturnT = TypeVar("ReturnT")
+from typing import ClassVar
 
 
-class Effect(Generic[ReturnT]):
+class Effect[ReturnT]:
     """Effects are requests for a handler to do something."""
 
     tag: ClassVar[str]

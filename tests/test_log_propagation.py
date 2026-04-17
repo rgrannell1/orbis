@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, ClassVar, Generator
+from collections.abc import Generator
+from typing import Any, ClassVar
 from orbis import Effect, Event, complete, run
 
 
