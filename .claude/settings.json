@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/home/rg/Code/zahir/**)",
+      "Bash(rs lint)",
+      "Bash(ls -la bs)"
+    ]
+  }
+}
