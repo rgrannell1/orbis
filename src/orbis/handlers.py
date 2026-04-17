@@ -1,4 +1,5 @@
 
+import inspect
 from typing import Any, Generator, Protocol, TypeVar
 
 from orbis.exceptions import UnhandledEffect
@@ -33,7 +34,11 @@ def _drive(gen: Generator[Any, Any, ReturnT], handlers: dict[str, EffectHandler[
 
     if effect.tag in handlers:
       try:
-        send_value = handlers[effect.tag](effect)
+        result = handlers[effect.tag](effect)
+        if inspect.isgenerator(result):
+          send_value = yield from _drive(result, handlers)
+        else:
+          send_value = result
         pending_throw = None
       except Exception as err:
         send_value = None
