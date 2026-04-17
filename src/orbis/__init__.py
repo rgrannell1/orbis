@@ -1,6 +1,6 @@
 from orbis.effects import Effect, Event
 from orbis.exceptions import UnhandledEffect
-from orbis.handlers import EffectHandler, Handler, handle, orbis
+from orbis.handlers import EffectHandler, Handler, handle, complete
 
 __all__ = [
   "Effect",
@@ -9,5 +9,5 @@ __all__ = [
   "Handler",
   "UnhandledEffect",
   "handle",
-  "orbis",
+  "complete",
 ]

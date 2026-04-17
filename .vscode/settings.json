@@ -13,5 +13,8 @@
     "titleBar.inactiveForeground": "#e7e7e799"
   },
   "peacock.color": "#007fff",
-  "cSpell.enabled": false
+  "cSpell.enabled": false,
+  "chat.tools.terminal.autoApprove": {
+
+  }
 }
