@@ -1,6 +1,6 @@
 
 from typing import Generator
-from orbis import Effect, handle, complete
+from orbis import Effect, on_effect, complete
 
 # We'll ping an integer around
 MarcoPaloSend = int
@@ -49,10 +49,6 @@ def test_marco_polo_counting():
   def handle_polo(effect: Polo) -> int:
     return effect.count + 1
 
-  with handle(
-    marco=handle_marco,
-    polo=handle_polo,
-  ) as han:
-    result = complete(han.run(marco_polo()))
+  result = complete(on_effect(marco=handle_marco, polo=handle_polo).run(marco_polo()))
 
   assert result == (3, 3)

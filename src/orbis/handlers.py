@@ -1,5 +1,4 @@
 
-from contextlib import contextmanager
 from typing import Any, Generator, Protocol, TypeVar
 
 from orbis.exceptions import UnhandledEffect
@@ -52,9 +51,8 @@ class Handler:
     return _drive(gen, self._handlers)
 
 
-@contextmanager
-def handle(**handlers: EffectHandler[Any, Any]):
-  yield Handler(handlers)
+def on_effect(**handlers: EffectHandler[Any, Any]) -> Handler:
+  return Handler(handlers)
 
 
 

@@ -5,6 +5,8 @@
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
+Orbis decouples what needs to be done from how it's done.
+
 ## Build
 
 ```sh
