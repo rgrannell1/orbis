@@ -2,7 +2,7 @@ import pytest
 from dataclasses import dataclass
 from collections.abc import Generator
 from typing import ClassVar
-from orbis import Effect, UnhandledEffect, complete, run
+from orbis import Effect, UnhandledEffect, complete, handle
 
 
 @dataclass
@@ -73,7 +73,7 @@ def test_unhandled_effect_after_handler_throw_receives_outer_value():
             val = yield EUnhandled("after-throw")
             received.append(val)
 
-    inner = run(program(), fetch=handle_fetch_raising)
+    inner = handle(program(), fetch=handle_fetch_raising)
     effect = next(inner)
     assert effect.tag == "unhandled"
 

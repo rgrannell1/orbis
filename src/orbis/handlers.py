@@ -48,10 +48,10 @@ def _drive[ReturnT](
             send_value = yield effect
 
 
-def run[ReturnT](
+def handle[ReturnT](
     gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]
 ) -> Generator[Any, Any, ReturnT]:
-    """Run the generator, handling matched effects and bubbling the rest."""
+    """Handle matched effects, bubbling the rest through."""
 
     return _drive(gen, handlers)
 
@@ -61,7 +61,7 @@ def complete[ReturnT](
 ) -> ReturnT:
     """Run the generator to completion; raises on any unhandled effect."""
 
-    driven = run(gen, **handlers)
+    driven = handle(gen, **handlers)
     send_value = None
 
     while True:

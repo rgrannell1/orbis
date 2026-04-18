@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from collections.abc import Generator
 from typing import Any, ClassVar
-from orbis import Effect, Event, complete, run
+from orbis import Effect, Event, complete, handle
 
 
 @dataclass
@@ -23,7 +23,7 @@ def fetch_user(user_id: int) -> Generator[EFetch | ELog, str, dict]:
 
 
 def with_http(gen: Generator[Any, Any, Any]) -> Generator[Any, Any, Any]:
-    return run(gen, fetch=lambda effect: "alice")
+    return handle(gen, fetch=lambda effect: "alice")
 
 
 def main() -> Generator[ELog, None, str]:

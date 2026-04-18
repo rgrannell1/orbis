@@ -6,7 +6,7 @@
 
 > All men who repeat a line from Shakespeare are William Shakespeare
 
-Or, any method will do as long as it does the thing.
+Or; anything that does our task is equivalent to us.
 
 Orbis decouples what needs to be done from how it's done. It implements a Python-friendly subset of [algebraic effects](https://en.wikipedia.org/wiki/Effect_system), which is powerful enough for my own uses.
 
@@ -56,7 +56,7 @@ Why bother?
 - Type signatures document logging, database calls, and other aspects of a program
 - Non-OOP dependency injection; program against interfaces rather than concrete implementations
 - Clean implementation of custom control-flow mechanisms & state-machines
-- No mocks in testing is a benefit
+- No mocks in testing; swap out handlers for stubs instead
 - Nicer than monads
 
 ## Constructs
@@ -108,11 +108,11 @@ Events don't receive responses; they're simply modelled as `Effect[None]` and ar
 
 ### Handlers - Listen & react
 
-Handlers are just normal generators; they're registered to listen for an effect, and upon receiving it they return a value, raise an error, or yield their own effects.
+Handlers are functions or generators; they're registered to listen for an effect, and given it they are then effectful programs themselves; they can return values, throw errors, or yield and receive from the effects they yield themselves.
 
 ## Composition
 
-Effectful programs can be composeed using `yield from`; effects bubble up to whichever handler covers them without additional wiring.
+Effectful programs can be composed using `yield from`; effects bubble up to whichever handler covers them without additional wiring.
 
 ```python
 def fetch_user(user_id: int) -> Generator[EFetch, str, User]:
@@ -145,10 +145,10 @@ def fetch_user(user_id: int) -> Generator[EFetch | ELog, str, User]:
     return User(id=int(user_id), name=body)
 
 def with_http(gen):
-    return run(gen, fetch=lambda effect: requests.get(effect.url).text)
+    return handle(gen, fetch=lambda effect: requests.get(effect.url).text)
 
 def with_logging(gen):
-    return run(gen, log=lambda effect: print(effect.message))
+    return handle(gen, log=lambda effect: print(effect.message))
 
 result = complete(with_logging(with_http(fetch_user(123))))
 ```
