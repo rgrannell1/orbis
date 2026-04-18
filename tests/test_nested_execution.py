@@ -51,7 +51,9 @@ def with_server_handlers(
 ) -> Generator[ERequest | ERespond | ELog, object, str]:
     """Handles ERequest and ERespond, letting ELog bubble."""
 
-    return handle(gen, request=handle_request, respond=partial(handle_respond, responses))
+    return handle(
+        gen, request=handle_request, respond=partial(handle_respond, responses)
+    )
 
 
 def test_log_handled_by_downstream_handler():

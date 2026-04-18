@@ -77,6 +77,10 @@ def test_traffic_light_multiple_cycles():
     )
 
     assert logs == [
-        "red → green", "green → yellow", "yellow → red",
-        "red → green", "green → yellow", "yellow → red",
+        "red → green",
+        "green → yellow",
+        "yellow → red",
+        "red → green",
+        "green → yellow",
+        "yellow → red",
     ]

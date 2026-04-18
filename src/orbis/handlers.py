@@ -5,7 +5,6 @@ from collections.abc import Generator
 from typing import Any, Protocol
 
 from orbis.exceptions import UnhandledEffect
-from orbis.effects import Effect
 
 type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
 
