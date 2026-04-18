@@ -1,7 +1,7 @@
 """The core data-types of Orbis. Effects and Events are emitted
 and handled."""
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 
 class Effect[ReturnT]:
@@ -9,8 +9,13 @@ class Effect[ReturnT]:
 
     tag: ClassVar[str]
 
+    def __init_subclass__(cls, abstract: bool = False, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not abstract and "tag" not in cls.__dict__:
+            raise TypeError(f"{cls.__name__} must define a 'tag' ClassVar")
 
-class Event(Effect[None]):
+
+class Event(Effect[None], abstract=True):
     """Events are effects that don't return a value."""
 
     tag: ClassVar[str]

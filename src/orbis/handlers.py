@@ -44,17 +44,19 @@ def _drive[ReturnT](
                 send_value = None
                 pending_throw = err
         else:
-            send_value = yield effect
             pending_throw = None
+            send_value = yield effect
 
 
 def run[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> Generator[Any, Any, ReturnT]:
     """Run the generator, handling matched effects and bubbling the rest."""
+
     return _drive(gen, handlers)
 
 
 def complete[ReturnT](gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]) -> ReturnT:
     """Run the generator to completion; raises on any unhandled effect."""
+
     driven = run(gen, **handlers)
     send_value = None
 

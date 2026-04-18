@@ -2,7 +2,7 @@ import pytest
 from dataclasses import dataclass
 from collections.abc import Generator
 from typing import ClassVar
-from orbis import Effect, UnhandledEffect, complete
+from orbis import Effect, UnhandledEffect, complete, run
 
 
 @dataclass
@@ -53,3 +53,33 @@ def test_handler_exception_propagates_when_uncaught():
 
     with pytest.raises(ValueError, match="network error"):
         complete(program(), fetch=handle_fetch_raising)
+
+
+@dataclass
+class EUnhandled(Effect[str]):
+    tag: ClassVar[str] = "unhandled"
+    label: str
+
+
+def test_unhandled_effect_after_handler_throw_receives_outer_value():
+    """Proves generator receives the outer response for an unhandled effect, not a stale handler result."""
+
+    received: list[str] = []
+
+    def program() -> Generator[EFetch | EUnhandled, str, None]:
+        try:
+            yield EFetch("http://bad.example.com")
+        except ValueError:
+            val = yield EUnhandled("after-throw")
+            received.append(val)
+
+    inner = run(program(), fetch=handle_fetch_raising)
+    effect = next(inner)
+    assert effect.tag == "unhandled"
+
+    try:
+        inner.send("outer-value")
+    except StopIteration:
+        pass
+
+    assert received == ["outer-value"]
