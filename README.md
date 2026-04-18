@@ -112,6 +112,47 @@ Handlers are just normal generators; they're registered to listen for an effect,
 
 ## Composition
 
+Effectful programs can be composeed using `yield from`; effects bubble up to whichever handler covers them without additional wiring.
+
+```python
+def fetch_user(user_id: int) -> Generator[EFetch, str, User]:
+    body = yield EFetch(f"/users/{user_id}")
+    return User(id=int(user_id), name=body)
+
+def fetch_posts(user_id: int) -> Generator[EFetch, str, list[Post]]:
+    body = yield EFetch(f"/users/{user_id}/posts")
+    return [Post(title=t) for t in body.split(",")]
+
+def fetch_profile(user_id: int) -> Generator[EFetch, str, Profile]:
+    user  = yield from fetch_user(user_id)
+    posts = yield from fetch_posts(user_id)
+
+    return Profile(user=user, posts=posts)
+
+# this handler intercepts all inner fetches
+result = complete(fetch_profile(1), fetch=handle_fetch)
+```
+
+We do not need to handle every effect in the same part of our program; handlers chain, and we can separate out interception of effects into separate layers of the codebase. The only caveat is every effect must _eventually_ have a handler bound, somewhere.
+
+This allows logging, monitoring, or tracing to be delegated to its own handler layer decoupled from the core program logic.
+
+```python
+def fetch_user(user_id: int) -> Generator[EFetch | ELog, str, User]:
+    yield ELog(f"fetching user {user_id}")
+    body = yield EFetch(f"/users/{user_id}")
+
+    return User(id=int(user_id), name=body)
+
+def with_http(gen):
+    return run(gen, fetch=lambda effect: requests.get(effect.url).text)
+
+def with_logging(gen):
+    return run(gen, log=lambda effect: print(effect.message))
+
+result = complete(with_logging(with_http(fetch_user(123))))
+```
+
 ## Build
 
 ```sh

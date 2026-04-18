@@ -62,7 +62,9 @@ def test_traced_decorator_emits_trace_per_fetch():
 
     traces: list[str] = []
 
-    result = complete(fetch_page(), fetch=handle_fetch, trace=partial(handle_trace, traces))
+    result = complete(
+        fetch_page(), fetch=handle_fetch, trace=partial(handle_trace, traces)
+    )
 
     assert result == "<http://example.com/a>,<http://example.com/b>"
     assert traces == [

@@ -49,7 +49,12 @@ def test_handler_can_perform_effects():
     logs: list[str] = []
     cache: dict[str, str] = {"http://example.com": "<cached body>"}
 
-    result = complete(program(), fetch=handle_fetch, cache=lambda effect: cache.get(effect.key), log=lambda effect: logs.append(effect.message))
+    result = complete(
+        program(),
+        fetch=handle_fetch,
+        cache=lambda effect: cache.get(effect.key),
+        log=lambda effect: logs.append(effect.message),
+    )
 
     assert result == "<cached body>"
     assert logs == ["fetching http://example.com", "cache hit: http://example.com"]

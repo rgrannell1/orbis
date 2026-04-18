@@ -60,7 +60,10 @@ def test_log_handled_by_downstream_handler():
     log_lines: list[str] = []
     responses: list[str] = []
 
-    result = complete(with_server_handlers(responses, fake_server()), log=partial(handle_log, log_lines))
+    result = complete(
+        with_server_handlers(responses, fake_server()),
+        log=partial(handle_log, log_lines),
+    )
 
     assert result == "done"
     assert responses == ["200 OK /hello"]
