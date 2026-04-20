@@ -1,7 +1,7 @@
 """Handlers are functions that handle effects and events."""
 
 import inspect
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Any, Protocol
 
 from orbis.exceptions import UnhandledEffect
@@ -71,6 +71,33 @@ def pipe[ReturnT](
     if kwargs:
         result = handle(result, kwargs)
     return result
+
+
+def tap[ReturnT](
+    gen: Generator[Any, Any, ReturnT],
+    tag: str,
+    fn: Callable[[Any], Any],
+) -> Generator[Any, Any, ReturnT]:
+    """Observe effects matching tag without consuming them.
+
+    fn(effect) may be a plain function or generator; any effects it yields
+    bubble outward. The original effect always continues bubbling unchanged.
+    """
+
+    send_value = None
+
+    while True:
+        try:
+            effect = gen.send(send_value)
+        except StopIteration as stop:
+            return stop.value
+
+        if effect.tag == tag:
+            result = fn(effect)
+            if inspect.isgenerator(result):
+                yield from result
+
+        send_value = yield effect
 
 
 def complete[ReturnT](

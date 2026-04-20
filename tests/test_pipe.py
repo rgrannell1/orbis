@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from collections.abc import Generator
 from typing import ClassVar
 
-from orbis import Effect, Event, complete, pipe
+from orbis import Effect, Event, complete, handle, pipe
 
 
 @dataclass
@@ -82,3 +82,43 @@ def test_pipe_with_single_layer_matches_handle():
     )
 
     assert result == "<http://example.com>"
+
+
+def test_pipe_kwargs_form():
+    """pipe accepts kwargs as a final handler layer."""
+
+    logs: list[str] = []
+    metrics: list[str] = []
+
+    result = complete(
+        pipe(
+            program(),
+            {"fetch": lambda effect: f"<{effect.url}>"},
+            log=lambda effect: logs.append(effect.message),
+            metric=lambda effect: metrics.append(effect.name),
+        )
+    )
+
+    assert result == "<http://example.com>"
+    assert logs == ["starting"]
+    assert metrics == ["fetch_count"]
+
+
+def test_handle_positional_dict_form():
+    """handle accepts a dict as a positional argument."""
+
+    logs: list[str] = []
+
+    result = complete(
+        handle(
+            program(),
+            {
+                "fetch": lambda effect: f"<{effect.url}>",
+                "log": lambda effect: logs.append(effect.message),
+                "metric": lambda _: None,
+            },
+        )
+    )
+
+    assert result == "<http://example.com>"
+    assert logs == ["starting"]
