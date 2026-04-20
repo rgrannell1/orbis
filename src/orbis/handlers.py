@@ -4,6 +4,8 @@ import inspect
 from collections.abc import Callable, Generator
 from typing import Any, Protocol
 
+_effect_source_frame = None
+
 from orbis.exceptions import UnhandledEffect
 
 type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
@@ -44,6 +46,8 @@ def _drive[ReturnT](
                 pending_throw = err
         else:
             pending_throw = None
+            global _effect_source_frame
+            _effect_source_frame = gen.gi_frame
             send_value = yield effect
 
 
@@ -113,6 +117,6 @@ def complete[ReturnT](
     while True:
         try:
             effect = driven.send(send_value)
-            raise UnhandledEffect(effect)
+            raise UnhandledEffect(effect, frame=_effect_source_frame)
         except StopIteration as stop:
             return stop.value
