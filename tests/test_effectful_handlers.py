@@ -43,6 +43,33 @@ def handle_fetch(effect: EFetch) -> Generator[ELog | ECache, str | None, str]:
     return f"<body of {effect.url}>"
 
 
+def handle_fetch_raising(effect: EFetch) -> Generator[ELog, str, str]:
+    yield ELog("before raise")
+    raise ValueError("sub-handler error")
+
+
+def test_effectful_handler_exception_thrown_into_program():
+    """Proves exceptions raised inside a generator handler are thrown back into the program."""
+
+    def program() -> Generator[EFetch, str, str]:
+        try:
+            result = yield EFetch("http://example.com")
+        except ValueError:
+            result = "caught"
+        return result
+
+    logs: list[str] = []
+
+    result = complete(
+        program(),
+        fetch=handle_fetch_raising,
+        log=lambda effect: logs.append(effect.message),
+    )
+
+    assert result == "caught"
+    assert logs == ["before raise"]
+
+
 def test_handler_can_perform_effects():
     """Proves handlers can yield both Events and Effects"""
 

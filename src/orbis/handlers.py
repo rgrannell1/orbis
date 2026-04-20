@@ -22,21 +22,47 @@ def _drive[ReturnT](
 ) -> Generator[Any, Any, ReturnT]:
     """Run the generator against the given handlers."""
 
+    stack: list[Generator[Any, Any, Any]] = [gen]
     send_value = None
     pending_throw = None
 
+    # We loop until the stack is empty, which means the original generator has returned and all handlers have finished.
     while True:
+        current = stack[-1]
+
         try:
-            effect = gen.throw(pending_throw) if pending_throw else gen.send(send_value)
+            # If there's a pending exception, throw it into the generator; otherwise, send the last value.
+            effect = current.throw(pending_throw) if pending_throw else current.send(send_value)
+            pending_throw = None
         except StopIteration as stop:
-            return stop.value
+            # The current generator is done; pop the stack and send its return value to the next one.
+            stack.pop()
+
+            if not stack:
+                return stop.value
+
+            send_value = stop.value
+            pending_throw = None
+            continue
+
+        except Exception as err:
+            # An exception was raised inside the generator; pop the stack and throw it into the next one.
+
+            stack.pop()
+            if not stack:
+                raise
+
+            send_value = None
+            pending_throw = err
+            continue
 
         if effect.tag in handlers:
             try:
                 result = handlers[effect.tag](effect)
 
                 if inspect.isgenerator(result):
-                    send_value = yield from _drive(result, handlers)
+                    stack.append(result)
+                    send_value = None
                 else:
                     send_value = result
 
@@ -45,9 +71,11 @@ def _drive[ReturnT](
                 send_value = None
                 pending_throw = err
         else:
-            pending_throw = None
+            # unhandled effect; bubble up
+
             global _effect_source_frame
-            _effect_source_frame = gen.gi_frame
+            _effect_source_frame = current.gi_frame
+            pending_throw = None
             send_value = yield effect
 
 
