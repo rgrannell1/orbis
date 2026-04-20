@@ -13,6 +13,8 @@ class Effect[ReturnT]:
         super().__init_subclass__(**kwargs)
         if not abstract and "tag" not in cls.__dict__:
             raise TypeError(f"{cls.__name__} must define a 'tag' ClassVar")
+        if not abstract and not cls.__dict__.get("tag"):
+            raise TypeError(f"{cls.__name__} tag must be a non-empty string")
 
 
 class Event(Effect[None], abstract=True):

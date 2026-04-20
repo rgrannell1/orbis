@@ -1,20 +1,14 @@
-"""Handlers are functions that handle effects and events."""
+"""The orbis effect runtime — drive, handle, pipe, tap, and complete."""
 
+import contextvars
 import inspect
 from collections.abc import Callable, Generator
-from typing import Any, Protocol
-
-_effect_source_frame = None
+from typing import Any
 
 from orbis.exceptions import UnhandledEffect
+from orbis.orbis_types import EffectHandler, HandlerDict
 
-type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
-
-
-class EffectHandler[EffectT, HandlerReturnT](Protocol):
-    """A handler is a function that handles an effect."""
-
-    def __call__(self, effect: EffectT) -> HandlerReturnT: ...
+_effect_source_frame: contextvars.ContextVar = contextvars.ContextVar("_effect_source_frame", default=None)
 
 
 def _drive[ReturnT](
@@ -73,8 +67,7 @@ def _drive[ReturnT](
         else:
             # unhandled effect; bubble up
 
-            global _effect_source_frame
-            _effect_source_frame = current.gi_frame
+            _effect_source_frame.set(current.gi_frame)
             pending_throw = None
             send_value = yield effect
 
@@ -117,10 +110,12 @@ def tap[ReturnT](
     """
 
     send_value = None
+    pending_throw = None
 
     while True:
         try:
-            effect = gen.send(send_value)
+            effect = gen.throw(pending_throw) if pending_throw else gen.send(send_value)
+            pending_throw = None
         except StopIteration as stop:
             return stop.value
 
@@ -129,7 +124,12 @@ def tap[ReturnT](
             if inspect.isgenerator(result):
                 yield from result
 
-        send_value = yield effect
+        try:
+            send_value = yield effect
+            pending_throw = None
+        except Exception as err:
+            send_value = None
+            pending_throw = err
 
 
 def complete[ReturnT](
@@ -145,6 +145,6 @@ def complete[ReturnT](
     while True:
         try:
             effect = driven.send(send_value)
-            raise UnhandledEffect(effect, frame=_effect_source_frame)
+            raise UnhandledEffect(effect, frame=_effect_source_frame.get())
         except StopIteration as stop:
             return stop.value
