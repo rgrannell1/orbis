@@ -1,6 +1,6 @@
 from orbis.effects import Effect, Event
 from orbis.exceptions import UnhandledEffect
-from orbis.handlers import EffectHandler, HandlerDict, complete, handle
+from orbis.handlers import EffectHandler, HandlerDict, complete, handle, pipe
 
 __all__ = [
     "Effect",
@@ -10,4 +10,5 @@ __all__ = [
     "UnhandledEffect",
     "complete",
     "handle",
+    "pipe",
 ]

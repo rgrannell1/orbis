@@ -55,6 +55,17 @@ def handle[ReturnT](
     return _drive(gen, handlers)
 
 
+def pipe[ReturnT](
+    gen: Generator[Any, Any, ReturnT], *layers: HandlerDict
+) -> Generator[Any, Any, ReturnT]:
+    """Layer handler dicts from left to right; unhandled effects bubble outward."""
+
+    result = gen
+    for layer in layers:
+        result = handle(result, **layer)
+    return result
+
+
 def complete[ReturnT](
     gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]
 ) -> ReturnT:
