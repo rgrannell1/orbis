@@ -2,13 +2,14 @@
 
 import contextvars
 import inspect
+import types
 from collections.abc import Callable, Generator
-from typing import Any
+from typing import Any, cast
 
 from orbis.exceptions import UnhandledEffect
 from orbis.orbis_types import EffectHandler, HandlerDict
 
-_effect_source_frame: contextvars.ContextVar = contextvars.ContextVar("_effect_source_frame", default=None)
+_effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar("_effect_source_frame", default=None)
 
 
 def _drive[ReturnT](
@@ -67,7 +68,7 @@ def _drive[ReturnT](
         else:
             # unhandled effect; bubble up
 
-            _effect_source_frame.set(current.gi_frame)
+            _effect_source_frame.set(cast(types.GeneratorType, current).gi_frame)
             pending_throw = None
             send_value = yield effect
 
@@ -101,7 +102,7 @@ def pipe[ReturnT](
 def tap[ReturnT](
     gen: Generator[Any, Any, ReturnT],
     tag: str,
-    fn: Callable[[Any], Any],
+    fn: Callable[[Any], Generator[Any, Any, None] | None],
 ) -> Generator[Any, Any, ReturnT]:
     """Observe effects matching tag without consuming them.
 
