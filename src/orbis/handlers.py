@@ -48,30 +48,39 @@ def _drive[ReturnT](
 
 
 def handle[ReturnT](
-    gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]
+    gen: Generator[Any, Any, ReturnT],
+    handlers: HandlerDict | None = None,
+    **kwargs: EffectHandler[Any, Any],
 ) -> Generator[Any, Any, ReturnT]:
     """Handle matched effects, bubbling the rest through."""
 
-    return _drive(gen, handlers)
+    merged = {**(handlers or {}), **kwargs}
+    return _drive(gen, merged)
 
 
 def pipe[ReturnT](
-    gen: Generator[Any, Any, ReturnT], *layers: HandlerDict
+    gen: Generator[Any, Any, ReturnT],
+    *layers: HandlerDict,
+    **kwargs: EffectHandler[Any, Any],
 ) -> Generator[Any, Any, ReturnT]:
     """Layer handler dicts from left to right; unhandled effects bubble outward."""
 
     result = gen
     for layer in layers:
-        result = handle(result, **layer)
+        result = handle(result, layer)
+    if kwargs:
+        result = handle(result, kwargs)
     return result
 
 
 def complete[ReturnT](
-    gen: Generator[Any, Any, ReturnT], **handlers: EffectHandler[Any, Any]
+    gen: Generator[Any, Any, ReturnT],
+    handlers: HandlerDict | None = None,
+    **kwargs: EffectHandler[Any, Any],
 ) -> ReturnT:
     """Run the generator to completion; raises on any unhandled effect."""
 
-    driven = handle(gen, **handlers)
+    driven = handle(gen, handlers, **kwargs)
     send_value = None
 
     while True:
