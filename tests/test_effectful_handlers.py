@@ -1,6 +1,10 @@
+"""Tests for handlers that are themselves generators, yielding their own effects."""
+
 from dataclasses import dataclass
 from collections.abc import Generator
+from functools import partial
 from typing import ClassVar
+
 from orbis import Effect, Event, complete
 
 
@@ -29,6 +33,14 @@ def program() -> Generator[EFetch, str, str]:
     return result
 
 
+def _program_catching_value_error() -> Generator[EFetch, str, str]:
+    try:
+        result = yield EFetch("http://example.com")
+    except ValueError:
+        result = "caught"
+    return result
+
+
 def handle_fetch(effect: EFetch) -> Generator[ELog | ECache, str | None, str]:
     """Handler that uses both Event (ELog) and Effect (ECache)."""
 
@@ -48,22 +60,23 @@ def handle_fetch_raising(effect: EFetch) -> Generator[ELog, str, str]:
     raise ValueError("sub-handler error")
 
 
+def _record_message(target: list, effect: ELog) -> None:
+    target.append(effect.message)
+
+
+def _cache_lookup(cache: dict, effect: ECache) -> str | None:
+    return cache.get(effect.key)
+
+
 def test_effectful_handler_exception_thrown_into_program():
     """Proves exceptions raised inside a generator handler are thrown back into the program."""
-
-    def program() -> Generator[EFetch, str, str]:
-        try:
-            result = yield EFetch("http://example.com")
-        except ValueError:
-            result = "caught"
-        return result
 
     logs: list[str] = []
 
     result = complete(
-        program(),
+        _program_catching_value_error(),
         fetch=handle_fetch_raising,
-        log=lambda effect: logs.append(effect.message),
+        log=partial(_record_message, logs),
     )
 
     assert result == "caught"
@@ -79,8 +92,8 @@ def test_handler_can_perform_effects():
     result = complete(
         program(),
         fetch=handle_fetch,
-        cache=lambda effect: cache.get(effect.key),
-        log=lambda effect: logs.append(effect.message),
+        cache=partial(_cache_lookup, cache),
+        log=partial(_record_message, logs),
     )
 
     assert result == "<cached body>"

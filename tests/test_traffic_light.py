@@ -1,6 +1,10 @@
+"""Tests for a traffic light state machine — effectful handlers driving state transitions."""
+
 from dataclasses import dataclass
 from collections.abc import Generator
+from functools import partial
 from typing import ClassVar
+
 from orbis import Effect, Event, complete
 
 
@@ -47,6 +51,18 @@ def handle_transition(effect: ETransition) -> Generator[ELog | EBroadcast, None,
     return next_phase
 
 
+def _record_message(target: list, effect: ELog) -> None:
+    target.append(effect.message)
+
+
+def _record_broadcast(target: list, effect: EBroadcast) -> None:
+    target.append(effect.message)
+
+
+def _noop(_) -> None:
+    pass
+
+
 def test_traffic_light_transitions_and_broadcasts():
     """Proves effectful handlers can drive state transitions while emitting their own effects."""
 
@@ -56,8 +72,8 @@ def test_traffic_light_transitions_and_broadcasts():
     complete(
         traffic_light(cycles=1),
         transition=handle_transition,
-        log=lambda e: logs.append(e.message),
-        broadcast=lambda e: broadcasts.append(e.message),
+        log=partial(_record_message, logs),
+        broadcast=partial(_record_broadcast, broadcasts),
     )
 
     assert logs == ["red → green", "green → yellow", "yellow → red"]
@@ -72,8 +88,8 @@ def test_traffic_light_multiple_cycles():
     complete(
         traffic_light(cycles=2),
         transition=handle_transition,
-        log=lambda e: logs.append(e.message),
-        broadcast=lambda e: None,
+        log=partial(_record_message, logs),
+        broadcast=_noop,
     )
 
     assert logs == [

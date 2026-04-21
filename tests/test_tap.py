@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from collections.abc import Generator
+from functools import partial
 from typing import ClassVar
 
 from orbis import Effect, Event, complete, tap
@@ -24,12 +25,37 @@ def program() -> Generator[EFetch, str, str]:
     return result
 
 
+def _capture_program(received: list) -> Generator[EFetch, str, None]:
+    val = yield EFetch("http://example.com")
+    received.append(val)
+
+
+def _fetch_url(effect: EFetch) -> str:
+    return f"<{effect.url}>"
+
+
+def _return_body(_) -> str:
+    return "the-body"
+
+
+def _noop(_) -> None:
+    pass
+
+
+def _record_url(target: list, effect: EFetch) -> None:
+    target.append(effect.url)
+
+
+def _record_message(target: list, effect: ELog) -> None:
+    target.append(effect.message)
+
+
 def test_tap_does_not_consume_effect():
     """Proves tapped effect is still handled by the outer handler."""
 
     result = complete(
-        tap(program(), "fetch", lambda _: None),
-        fetch=lambda effect: f"<{effect.url}>",
+        tap(program(), "fetch", _noop),
+        fetch=_fetch_url,
     )
 
     assert result == "<http://example.com>"
@@ -41,8 +67,8 @@ def test_tap_fn_is_called_for_matching_tag():
     seen: list[str] = []
 
     complete(
-        tap(program(), "fetch", lambda e: seen.append(e.url)),
-        fetch=lambda effect: f"<{effect.url}>",
+        tap(program(), "fetch", partial(_record_url, seen)),
+        fetch=_fetch_url,
     )
 
     assert seen == ["http://example.com"]
@@ -54,8 +80,8 @@ def test_tap_fn_not_called_for_non_matching_tag():
     seen: list[str] = []
 
     complete(
-        tap(program(), "log", lambda e: seen.append(e.message)),
-        fetch=lambda effect: f"<{effect.url}>",
+        tap(program(), "log", partial(_record_message, seen)),
+        fetch=_fetch_url,
     )
 
     assert seen == []
@@ -71,8 +97,8 @@ def test_tap_generator_fn_can_yield_effects():
 
     result = complete(
         tap(program(), "fetch", observe),
-        fetch=lambda effect: f"<{effect.url}>",
-        log=lambda effect: logs.append(effect.message),
+        fetch=_fetch_url,
+        log=partial(_record_message, logs),
     )
 
     assert result == "<http://example.com>"
@@ -84,13 +110,9 @@ def test_tap_original_effect_value_reaches_program():
 
     received: list[str] = []
 
-    def capture() -> Generator[EFetch, str, None]:
-        val = yield EFetch("http://example.com")
-        received.append(val)
-
     complete(
-        tap(capture(), "fetch", lambda _: None),
-        fetch=lambda effect: "the-body",
+        tap(partial(_capture_program, received)(), "fetch", _noop),
+        fetch=_return_body,
     )
 
     assert received == ["the-body"]

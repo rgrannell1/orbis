@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from collections.abc import Generator
+from functools import partial
 from typing import ClassVar
 
 from orbis import Effect, Event, complete, handle, pipe
@@ -34,6 +35,22 @@ def program() -> Generator[EFetch | ELog | EMetric, str, str]:
     return result
 
 
+def _fetch_url(effect: EFetch) -> str:
+    return f"<{effect.url}>"
+
+
+def _record_message(target: list, effect: ELog) -> None:
+    target.append(effect.message)
+
+
+def _record_name(target: list, effect: EMetric) -> None:
+    target.append(effect.name)
+
+
+def _noop(_) -> None:
+    pass
+
+
 def test_pipe_layers_handlers_left_to_right():
     """Inner layer handles fetch; outer layers handle log and metric separately."""
 
@@ -43,9 +60,9 @@ def test_pipe_layers_handlers_left_to_right():
     result = complete(
         pipe(
             program(),
-            {"fetch": lambda effect: f"<{effect.url}>"},
-            {"log": lambda effect: logs.append(effect.message)},
-            {"metric": lambda effect: metrics.append(effect.name)},
+            {"fetch": _fetch_url},
+            {"log": partial(_record_message, logs)},
+            {"metric": partial(_record_name, metrics)},
         )
     )
 
@@ -62,10 +79,10 @@ def test_pipe_unhandled_effects_bubble_to_complete():
     result = complete(
         pipe(
             program(),
-            {"fetch": lambda effect: f"<{effect.url}>"},
-            {"log": lambda effect: logs.append(effect.message)},
+            {"fetch": _fetch_url},
+            {"log": partial(_record_message, logs)},
         ),
-        metric=lambda effect: None,
+        metric=_noop,
     )
 
     assert result == "<http://example.com>"
@@ -76,9 +93,9 @@ def test_pipe_with_single_layer_matches_handle():
     """pipe with one layer is equivalent to handle."""
 
     result = complete(
-        pipe(program(), {"fetch": lambda effect: f"<{effect.url}>"}),
-        log=lambda _: None,
-        metric=lambda _: None,
+        pipe(program(), {"fetch": _fetch_url}),
+        log=_noop,
+        metric=_noop,
     )
 
     assert result == "<http://example.com>"
@@ -93,9 +110,9 @@ def test_pipe_kwargs_form():
     result = complete(
         pipe(
             program(),
-            {"fetch": lambda effect: f"<{effect.url}>"},
-            log=lambda effect: logs.append(effect.message),
-            metric=lambda effect: metrics.append(effect.name),
+            {"fetch": _fetch_url},
+            log=partial(_record_message, logs),
+            metric=partial(_record_name, metrics),
         )
     )
 
@@ -113,9 +130,9 @@ def test_handle_positional_dict_form():
         handle(
             program(),
             {
-                "fetch": lambda effect: f"<{effect.url}>",
-                "log": lambda effect: logs.append(effect.message),
-                "metric": lambda _: None,
+                "fetch": _fetch_url,
+                "log": partial(_record_message, logs),
+                "metric": _noop,
             },
         )
     )

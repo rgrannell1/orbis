@@ -1,3 +1,4 @@
+# Exceptions raised by the orbis runtime for unhandled or misused effects.
 import types
 from typing import Any
 from orbis.effects import Effect
