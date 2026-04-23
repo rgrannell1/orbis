@@ -7,19 +7,21 @@ from orbis import Effect, Event, complete
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 
 @dataclass
 class ETrace(Event):
-    tag: ClassVar[str] = "trace"
+    tag: ClassVar[LiteralString] = "trace"
     event: str
 
 
-def traced[ReturnT](
-    fn: Callable[..., Generator[EFetch, str, ReturnT]],
-) -> Callable[..., Generator[EFetch | ETrace, str, ReturnT]]:
+type FetchFn[ReturnT] = Callable[..., Generator[EFetch, str, ReturnT]]
+type TracedFn[ReturnT] = Callable[..., Generator[EFetch | ETrace, str, ReturnT]]
+
+
+def traced[ReturnT](fn: FetchFn[ReturnT]) -> TracedFn[ReturnT]:
     """Decorator that emits an ETrace effect before each EFetch."""
 
     @wraps(fn)

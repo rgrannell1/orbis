@@ -16,19 +16,19 @@ MarcoPaloReturn = tuple[int, int]
 # Two identical effects
 @dataclass
 class EMarco(Effect[int]):
-    tag: ClassVar[str] = "marco"
+    tag: ClassVar[LiteralString] = "marco"
     count: int
 
 
 @dataclass
 class EPolo(Effect[int]):
-    tag: ClassVar[str] = "polo"
+    tag: ClassVar[LiteralString] = "polo"
     count: int
 
 
 @dataclass
 class ENotify(Event):
-    tag: ClassVar[str] = "notify"
+    tag: ClassVar[LiteralString] = "notify"
     message: str
 
 

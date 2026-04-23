@@ -9,7 +9,7 @@ from orbis import Effect, Event, complete
 
 @dataclass
 class EDisplay(Event):
-    tag: ClassVar[str] = "display"
+    tag: ClassVar[LiteralString] = "display"
     message: str
 
 
@@ -19,19 +19,19 @@ class EInsertCoin(Effect[int]):
 
 @dataclass
 class ESelectItem(Effect[str | None]):
-    tag: ClassVar[str] = "select_item"
+    tag: ClassVar[LiteralString] = "select_item"
     balance: int
 
 
 @dataclass
 class EDispense(Event):
-    tag: ClassVar[str] = "dispense"
+    tag: ClassVar[LiteralString] = "dispense"
     item_id: str
 
 
 @dataclass
 class EReturnChange(Event):
-    tag: ClassVar[str] = "return_change"
+    tag: ClassVar[LiteralString] = "return_change"
     amount: int
 
 

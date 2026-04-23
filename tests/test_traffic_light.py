@@ -12,7 +12,7 @@ from orbis import Effect, Event, complete
 class ETransition(Effect[str]):
     """Request a transition from the current phase; returns the next phase."""
 
-    tag: ClassVar[str] = "transition"
+    tag: ClassVar[LiteralString] = "transition"
     phase: str
 
 
@@ -20,13 +20,13 @@ class ETransition(Effect[str]):
 class EBroadcast(Event):
     """Notify external systems of a phase change."""
 
-    tag: ClassVar[str] = "broadcast"
+    tag: ClassVar[LiteralString] = "broadcast"
     message: str
 
 
 @dataclass
 class ELog(Event):
-    tag: ClassVar[str] = "log"
+    tag: ClassVar[LiteralString] = "log"
     message: str
 
 

@@ -7,7 +7,7 @@ from collections.abc import Callable, Generator
 from typing import Any, cast
 
 from orbis.exceptions import UnhandledEffect
-from orbis.orbis_types import EffectHandler, HandlerDict
+from orbis.orbis_types import EffectHandler, HandlerDict, TapObserver
 
 _effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar("_effect_source_frame", default=None)
 
@@ -102,7 +102,7 @@ def pipe[ReturnT](
 def tap[ReturnT](
     gen: Generator[Any, Any, ReturnT],
     tag: str,
-    fn: Callable[[Any], Generator[Any, Any, None] | None],
+    fn: TapObserver,
 ) -> Generator[Any, Any, ReturnT]:
     """Observe effects matching tag without consuming them.
 

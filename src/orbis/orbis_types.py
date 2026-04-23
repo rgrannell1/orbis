@@ -1,5 +1,6 @@
 """Types and protocols for the orbis effect runtime."""
 
+from collections.abc import Callable, Generator
 from typing import Any, Protocol
 
 
@@ -10,3 +11,4 @@ class EffectHandler[EffectT, HandlerReturnT](Protocol):
 
 
 type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
+type TapObserver = Callable[[Any], Generator[Any, Any, None] | None]

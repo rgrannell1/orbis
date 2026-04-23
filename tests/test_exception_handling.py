@@ -7,7 +7,7 @@ from orbis import Effect, UnhandledEffect, complete, handle
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 
@@ -57,7 +57,7 @@ def test_handler_exception_propagates_when_uncaught():
 
 @dataclass
 class EUnhandled(Effect[str]):
-    tag: ClassVar[str] = "unhandled"
+    tag: ClassVar[LiteralString] = "unhandled"
     label: str
 
 

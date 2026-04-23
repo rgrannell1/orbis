@@ -10,23 +10,26 @@ from orbis import Effect, Event, complete, handle, pipe
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 
 @dataclass
 class ELog(Event):
-    tag: ClassVar[str] = "log"
+    tag: ClassVar[LiteralString] = "log"
     message: str
 
 
 @dataclass
 class EMetric(Event):
-    tag: ClassVar[str] = "metric"
+    tag: ClassVar[LiteralString] = "metric"
     name: str
 
 
-def program() -> Generator[EFetch | ELog | EMetric, str, str]:
+ProgramGen = Generator[EFetch | ELog | EMetric, str, str]
+
+
+def program() -> ProgramGen:
 
     yield ELog("starting")
     result = yield EFetch("http://example.com")

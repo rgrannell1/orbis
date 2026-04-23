@@ -10,13 +10,13 @@ from orbis import Effect, Event, complete, tap
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 
 @dataclass
 class ELog(Event):
-    tag: ClassVar[str] = "log"
+    tag: ClassVar[LiteralString] = "log"
     message: str
 
 

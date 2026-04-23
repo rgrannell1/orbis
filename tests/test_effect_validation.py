@@ -25,7 +25,7 @@ def test_effect_with_tag_is_valid():
     """Proves a well-formed Effect subclass is accepted."""
 
     class EOk(Effect[str]):
-        tag: ClassVar[str] = "ok"
+        tag: ClassVar[LiteralString] = "ok"
 
 
 def test_abstract_subclass_does_not_require_tag():
@@ -35,4 +35,4 @@ def test_abstract_subclass_does_not_require_tag():
         pass
 
     class EConcrete(EBase):
-        tag: ClassVar[str] = "concrete"
+        tag: ClassVar[LiteralString] = "concrete"

@@ -6,7 +6,7 @@ from orbis import Effect, complete
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 

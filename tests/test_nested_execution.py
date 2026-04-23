@@ -11,17 +11,20 @@ class ERequest(Effect[str]):
 
 @dataclass
 class ERespond(Event):
-    tag: ClassVar[str] = "respond"
+    tag: ClassVar[LiteralString] = "respond"
     body: str
 
 
 @dataclass
 class ELog(Event):
-    tag: ClassVar[str] = "log"
+    tag: ClassVar[LiteralString] = "log"
     message: str
 
 
-def fake_server() -> Generator[ERequest | ERespond | ELog, object, str]:
+ServerGen = Generator[ERequest | ERespond | ELog, object, str]
+
+
+def fake_server() -> ServerGen:
     """An effectful program simulating a server."""
 
     path = yield ERequest()
@@ -47,8 +50,8 @@ def handle_log(log_lines: list[str], effect: ELog) -> None:
 
 def with_server_handlers(
     responses: list[str],
-    gen: Generator[ERequest | ERespond | ELog, object, str],
-) -> Generator[ERequest | ERespond | ELog, object, str]:
+    gen: ServerGen,
+) -> ServerGen:
     """Handles ERequest and ERespond, letting ELog bubble."""
 
     return handle(

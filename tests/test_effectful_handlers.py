@@ -10,13 +10,13 @@ from orbis import Effect, Event, complete
 
 @dataclass
 class EFetch(Effect[str]):
-    tag: ClassVar[str] = "fetch"
+    tag: ClassVar[LiteralString] = "fetch"
     url: str
 
 
 @dataclass
 class ECache(Effect[str | None]):
-    tag: ClassVar[str] = "cache"
+    tag: ClassVar[LiteralString] = "cache"
     key: str
 
 
@@ -24,7 +24,7 @@ class ECache(Effect[str | None]):
 class ELog(Event):
     """Fire-and-forget; no response."""
 
-    tag: ClassVar[str] = "log"
+    tag: ClassVar[LiteralString] = "log"
     message: str
 
 
