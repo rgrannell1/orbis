@@ -1,6 +1,7 @@
-from dataclasses import dataclass
 from collections.abc import Generator
-from typing import ClassVar
+from dataclasses import dataclass
+from typing import ClassVar, LiteralString
+
 from orbis import Effect, complete
 
 

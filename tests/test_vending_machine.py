@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from collections.abc import Generator
-from typing import Any, ClassVar
-from orbis import Effect, Event, complete
+from dataclasses import dataclass
+from typing import Any, ClassVar, LiteralString
 
+from orbis import Effect, Event, complete
 
 # --- Vending Machine Effects ---
 

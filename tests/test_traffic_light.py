@@ -1,9 +1,9 @@
 """Tests for a traffic light state machine — effectful handlers driving state transitions."""
 
-from dataclasses import dataclass
 from collections.abc import Generator
+from dataclasses import dataclass
 from functools import partial
-from typing import ClassVar
+from typing import ClassVar, LiteralString
 
 from orbis import Effect, Event, complete
 

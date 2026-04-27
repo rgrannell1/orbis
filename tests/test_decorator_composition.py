@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 from collections.abc import Callable, Generator
+from dataclasses import dataclass
 from functools import partial, wraps
-from typing import ClassVar, cast
+from typing import ClassVar, LiteralString, cast
+
 from orbis import Effect, Event, complete
 
 

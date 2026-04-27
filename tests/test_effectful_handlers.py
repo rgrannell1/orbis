@@ -1,9 +1,9 @@
 """Tests for handlers that are themselves generators, yielding their own effects."""
 
-from dataclasses import dataclass
 from collections.abc import Generator
+from dataclasses import dataclass
 from functools import partial
-from typing import ClassVar
+from typing import ClassVar, LiteralString
 
 from orbis import Effect, Event, complete
 

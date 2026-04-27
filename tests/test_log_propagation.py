@@ -1,9 +1,9 @@
 """Tests for effect propagation across nested handle boundaries."""
 
-from dataclasses import dataclass
 from collections.abc import Generator
+from dataclasses import dataclass
 from functools import partial
-from typing import Any, ClassVar
+from typing import Any, ClassVar, LiteralString
 
 from orbis import Effect, Event, complete, handle
 

@@ -3,13 +3,13 @@
 import contextvars
 import inspect
 import types
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from typing import Any, cast
 
-from orbis.exceptions import UnhandledEffect
+from orbis.exceptions import UnhandledEffectError
 from orbis.orbis_types import EffectHandler, HandlerDict, TapObserver
 
-_effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar("_effect_source_frame", default=None)
+_effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar("_effect_source_frame", default=None)  # noqa: E501
 
 
 def _drive[ReturnT](
@@ -62,7 +62,7 @@ def _drive[ReturnT](
                     send_value = result
 
                 pending_throw = None
-            except Exception as err:
+            except Exception as err:  # noqa: BLE001
                 send_value = None
                 pending_throw = err
         else:
@@ -128,7 +128,7 @@ def tap[ReturnT](
         try:
             send_value = yield effect
             pending_throw = None
-        except Exception as err:
+        except Exception as err:  # noqa: BLE001
             send_value = None
             pending_throw = err
 
@@ -146,6 +146,6 @@ def complete[ReturnT](
     while True:
         try:
             effect = driven.send(send_value)
-            raise UnhandledEffect(effect, frame=_effect_source_frame.get())
+            raise UnhandledEffectError(effect, frame=_effect_source_frame.get())
         except StopIteration as stop:
             return stop.value

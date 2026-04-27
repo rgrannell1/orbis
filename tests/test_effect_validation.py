@@ -1,5 +1,7 @@
+from typing import ClassVar, LiteralString
+
 import pytest
-from typing import ClassVar
+
 from orbis import Effect, Event
 
 

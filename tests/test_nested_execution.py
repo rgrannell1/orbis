@@ -1,7 +1,8 @@
+from collections.abc import Generator
 from dataclasses import dataclass
 from functools import partial
-from collections.abc import Generator
-from typing import ClassVar
+from typing import ClassVar, LiteralString
+
 from orbis import Effect, Event, complete, handle
 
 

@@ -1,8 +1,11 @@
-import pytest
-from dataclasses import dataclass
+import contextlib
 from collections.abc import Generator
-from typing import ClassVar
-from orbis import Effect, UnhandledEffect, complete, handle
+from dataclasses import dataclass
+from typing import ClassVar, LiteralString
+
+import pytest
+
+from orbis import Effect, UnhandledEffectError, complete, handle
 
 
 @dataclass
@@ -22,7 +25,7 @@ def test_unhandled_effect_raises():
         result = yield EFetch("http://example.com")
         return result
 
-    with pytest.raises(UnhandledEffect) as exc_info:
+    with pytest.raises(UnhandledEffectError) as exc_info:
         complete(program())
 
     assert exc_info.value.effect.tag == "fetch"
@@ -77,9 +80,7 @@ def test_unhandled_effect_after_handler_throw_receives_outer_value():
     effect = next(inner)
     assert effect.tag == "unhandled"
 
-    try:
+    with contextlib.suppress(StopIteration):
         inner.send("outer-value")
-    except StopIteration:
-        pass
 
     assert received == ["outer-value"]
