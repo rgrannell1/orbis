@@ -46,10 +46,10 @@ def traced[ReturnT](fn: FetchFn[ReturnT]) -> TracedFn[ReturnT]:
 def fetch_page() -> Generator[EFetch, str, str]:
     """Fetches two pages and returns their combined length."""
 
-    a = yield EFetch("http://example.com/a")
-    b = yield EFetch("http://example.com/b")
+    page_a = yield EFetch("http://example.com/a")
+    page_b = yield EFetch("http://example.com/b")
 
-    return f"{a},{b}"
+    return f"{page_a},{page_b}"
 
 
 def handle_fetch(effect: EFetch) -> str:
