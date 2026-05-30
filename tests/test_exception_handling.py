@@ -65,7 +65,8 @@ class EUnhandled(Effect[str]):
 
 
 def test_unhandled_effect_after_handler_throw_receives_outer_value():
-    """Proves generator receives the outer response for an unhandled effect, not a stale handler result."""
+    """Proves generator receives outer response for unhandled effect, not
+    a stale handler result."""
 
     received: list[str] = []
 

@@ -12,6 +12,12 @@ class UnhandledEffectError(Exception):
         self.effect = effect
         self.frame = frame
 
-        location = f" at {frame.f_code.co_filename}:{frame.f_lineno} in {frame.f_code.co_name}" if frame else ""
+        if frame:
+            filename = frame.f_code.co_filename
+            lineno = frame.f_lineno
+            funcname = frame.f_code.co_name
+            location = f" at {filename}:{lineno} in {funcname}"
+        else:
+            location = ""
 
         super().__init__(f"no handler for effect '{effect.tag}'{location}")

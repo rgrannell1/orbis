@@ -9,7 +9,9 @@ from typing import Any, cast
 from orbis.exceptions import UnhandledEffectError
 from orbis.orbis_types import EffectHandler, HandlerDict, TapObserver
 
-_effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar("_effect_source_frame", default=None)  # noqa: E501
+_effect_source_frame: contextvars.ContextVar[types.FrameType | None] = contextvars.ContextVar(
+    "_effect_source_frame", default=None
+)
 
 
 def _drive[ReturnT](
@@ -21,16 +23,17 @@ def _drive[ReturnT](
     send_value = None
     pending_throw = None
 
-    # We loop until the stack is empty, which means the original generator has returned and all handlers have finished.
+    # Loop until stack is empty (original generator returned, all handlers
+    # finished).
     while True:
         current = stack[-1]
 
         try:
-            # If there's a pending exception, throw it into the generator; otherwise, send the last value.
+            # Throw pending exception or send last value to generator.
             effect = current.throw(pending_throw) if pending_throw else current.send(send_value)
             pending_throw = None
         except StopIteration as stop:
-            # The current generator is done; pop the stack and send its return value to the next one.
+            # Pop stack and send return value to next generator.
             stack.pop()
 
             if not stack:
@@ -41,8 +44,7 @@ def _drive[ReturnT](
             continue
 
         except Exception as err:
-            # An exception was raised inside the generator; pop the stack and throw it into the next one.
-
+            # Pop stack and throw exception to next generator.
             stack.pop()
             if not stack:
                 raise

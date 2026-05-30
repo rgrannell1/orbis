@@ -10,5 +10,5 @@ class EffectHandler[EffectT, HandlerReturnT](Protocol):
     def __call__(self, effect: EffectT) -> HandlerReturnT: ...
 
 
-type HandlerDict = dict[str, "EffectHandler[Any, Any]"]
+type HandlerDict = dict[str, EffectHandler[Any, Any]]
 type TapObserver = Callable[[Any], Generator[Any, Any, None] | None]
